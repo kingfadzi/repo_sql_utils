@@ -11,6 +11,7 @@ SELECT
     crm.app_id,
     crm.tc,
     crm.all_languages,
+    crm.main_language,
     v.id AS violation_id,
     v.ruleset_name,
     v.rule_name,
