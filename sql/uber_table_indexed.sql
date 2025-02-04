@@ -1,10 +1,10 @@
--- Enable the pg_trgm extension for GIN indexes
+-- Enable pg_trgm extension for GIN indexes
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
--- Drop the materialized view and its dependencies
+-- Drop the materialized view along with any dependencies
 DROP MATERIALIZED VIEW IF EXISTS combined_repo_metrics CASCADE;
 
--- Ensure indexes exist on frequently joined tables to speed up joins and aggregations
+-- Ensure indexes exist to speed up joins and aggregations
 CREATE INDEX IF NOT EXISTS idx_lizard_summary_repo_id ON lizard_summary(repo_id);
 CREATE INDEX IF NOT EXISTS idx_cloc_metrics_repo_id ON cloc_metrics(repo_id);
 CREATE INDEX IF NOT EXISTS idx_checkov_summary_repo_id ON checkov_summary(repo_id);
@@ -36,9 +36,7 @@ ON combined_repo_metrics USING GIN (classification_label gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_app_id_gin 
 ON combined_repo_metrics USING GIN (app_id gin_trgm_ops);
 
--- Drop and recreate materialized view for optimized refresh
-DROP MATERIALIZED VIEW IF EXISTS combined_repo_metrics;
-
+-- Create the optimized materialized view
 CREATE MATERIALIZED VIEW combined_repo_metrics AS
 WITH all_repos AS (
     SELECT DISTINCT repo_id FROM (
