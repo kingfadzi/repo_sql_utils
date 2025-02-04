@@ -117,17 +117,22 @@ SELECT
     b.clone_url_ssh,
     b.status,
     c.source_code_file_count,
-    rm.number_of_contributors,
     t.total_trivy_vulns,
     s.total_semgrep_findings,
     e.language_count,
     e.main_language,
     al.all_languages,
     rm.repo_size_bytes,
+    rm.file_count,
+    rm.total_commits,
+    rm.number_of_contributors,
+    rm.activity_status,
     rm.last_commit_date,
+    rm.repo_age_days,
+    rm.active_branch_count,
+    rm.updated_at,
     ck.iac_ansible,
     ck.iac_terraform,
-    rm.activity_status,
     -- Classification label logic remains unchanged
     CASE
         WHEN c.total_lines_of_code IS NULL OR c.total_lines_of_code < 100
@@ -157,7 +162,6 @@ LEFT JOIN go_enry_agg e ON r.repo_id = e.repo_id
 LEFT JOIN all_languages_agg al ON r.repo_id = al.repo_id
 LEFT JOIN repo_metrics rm ON r.repo_id = rm.repo_id
 ORDER BY r.repo_id;
-
 -- Create indexes only after the materialized view is created
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_host_name ON combined_repo_metrics (host_name);
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_activity_status ON combined_repo_metrics (activity_status);
