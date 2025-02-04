@@ -102,11 +102,47 @@ go_enry_agg AS (
         ) AS main_language
     FROM go_enry_analysis g
     GROUP BY g.repo_id
+),
+
+all_languages_agg AS (
+    SELECT
+        repo_id,
+        STRING_AGG(language, ', ' ORDER BY language) AS all_languages
+    FROM go_enry_analysis
+    GROUP BY repo_id
+),
+
+business_app_agg AS (
+    SELECT
+        rbm.project_key,
+        rbm.repo_slug,
+        rbm.component_id,
+        vcm_ba.web_url,
+        STRING_AGG(DISTINCT bam.business_app_identifier, ', ' ORDER BY bam.business_app_identifier) AS business_app_identifiers,
+        bam.transaction_cycle
+    FROM repo_business_mapping rbm
+    JOIN business_app_mapping bam ON rbm.component_id = bam.component_id
+    -- For business_app_agg we join version_control_mapping to get web_url (alias as vcm_ba)
+    JOIN version_control_mapping vcm_ba ON lower(rbm.project_key) = lower(vcm_ba.project_key)
+                                       AND lower(rbm.repo_slug) = lower(vcm_ba.repo_slug)
+    GROUP BY rbm.project_key, rbm.repo_slug, rbm.component_id, vcm_ba.web_url, bam.transaction_cycle
 )
 
 SELECT
     -- Repository identifier
     r.repo_id,
+
+    -- Bitbucket and Business App fields
+    b.host_name,
+    b.project_key,
+    b.repo_slug,
+    bapp.component_id,
+    bapp.business_app_identifiers AS app_id,
+    bapp.transaction_cycle AS tc,
+    vcm.web_url,  -- from version_control_mapping join (see below)
+    b.clone_url_ssh,
+    b.status,
+    b.comment,
 
     -- Lizard fields
     l.total_nloc                    AS executable_lines_of_code,
@@ -157,6 +193,7 @@ SELECT
     -- go-enry fields
     e.language_count,
     e.main_language,
+    al.all_languages,
 
     -- repo_metrics fields
     rm.repo_size_bytes,
@@ -169,16 +206,7 @@ SELECT
     rm.active_branch_count,
     rm.updated_at,
 
-    -- bitbucket_repositories fields
-    b.host_name,
-    b.app_id,
-    b.tc_cluster,
-    b.tc,
-    b.clone_url_ssh,
-    b.status,
-    b.comment,
-
-    -- Classification label based on code vs. non-code metrics
+    -- Classification label (based on repo_metrics and cloc fields)
     CASE
         WHEN c.total_lines_of_code IS NULL OR c.total_lines_of_code < 100
             THEN CASE
@@ -194,14 +222,19 @@ SELECT
         END
     END AS classification_label
 FROM all_repos r
-LEFT JOIN lizard_summary l ON r.repo_id = l.repo_id
-LEFT JOIN cloc_agg c ON r.repo_id = c.repo_id
-LEFT JOIN checkov_agg ck ON r.repo_id = ck.repo_id
-LEFT JOIN trivy_agg t ON r.repo_id = t.repo_id
-LEFT JOIN semgrep_agg s ON r.repo_id = s.repo_id
-LEFT JOIN go_enry_agg e ON r.repo_id = e.repo_id
-LEFT JOIN repo_metrics rm ON r.repo_id = rm.repo_id
-LEFT JOIN bitbucket_repositories b ON r.repo_id = b.repo_id
+    LEFT JOIN lizard_summary l ON r.repo_id = l.repo_id
+    LEFT JOIN cloc_agg c ON r.repo_id = c.repo_id
+    LEFT JOIN checkov_agg ck ON r.repo_id = ck.repo_id
+    LEFT JOIN trivy_agg t ON r.repo_id = t.repo_id
+    LEFT JOIN semgrep_agg s ON r.repo_id = s.repo_id
+    LEFT JOIN go_enry_agg e ON r.repo_id = e.repo_id
+    LEFT JOIN all_languages_agg al ON r.repo_id = al.repo_id
+    LEFT JOIN repo_metrics rm ON r.repo_id = rm.repo_id
+    LEFT JOIN bitbucket_repositories b ON r.repo_id = b.repo_id
+    LEFT JOIN business_app_agg bapp ON lower(b.project_key) = lower(bapp.project_key)
+                                   AND lower(b.repo_slug) = lower(bapp.repo_slug)
+    LEFT JOIN version_control_mapping vcm ON lower(b.project_key) = lower(vcm.project_key)
+                                         AND lower(b.repo_slug) = lower(vcm.repo_slug)
 ORDER BY r.repo_id;
 
 -- Create indexes on the materialized view for efficient UI filtering.
@@ -213,6 +246,7 @@ CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_main_language ON combined_r
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_classification_label ON combined_repo_metrics (classification_label);
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_app_id ON combined_repo_metrics (app_id);
 
+-- Add GIN indexes for text search (using pg_trgm)
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_main_language_gin 
     ON combined_repo_metrics USING GIN (main_language gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_classification_label_gin 
