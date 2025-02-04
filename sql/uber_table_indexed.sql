@@ -4,39 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- Drop the materialized view along with any dependencies
 DROP MATERIALIZED VIEW IF EXISTS combined_repo_metrics CASCADE;
 
--- Ensure indexes exist to speed up joins and aggregations
-CREATE INDEX IF NOT EXISTS idx_lizard_summary_repo_id ON lizard_summary(repo_id);
-CREATE INDEX IF NOT EXISTS idx_cloc_metrics_repo_id ON cloc_metrics(repo_id);
-CREATE INDEX IF NOT EXISTS idx_checkov_summary_repo_id ON checkov_summary(repo_id);
-CREATE INDEX IF NOT EXISTS idx_trivy_vulnerability_repo_id ON trivy_vulnerability(repo_id);
-CREATE INDEX IF NOT EXISTS idx_semgrep_results_repo_id ON semgrep_results(repo_id);
-CREATE INDEX IF NOT EXISTS idx_repo_metrics_repo_id ON repo_metrics(repo_id);
-CREATE INDEX IF NOT EXISTS idx_go_enry_analysis_repo_id ON go_enry_analysis(repo_id);
-CREATE INDEX IF NOT EXISTS idx_bitbucket_repositories_repo_id ON bitbucket_repositories(repo_id);
-
--- Ensure functional index for case-insensitive joins
-CREATE INDEX IF NOT EXISTS idx_version_control_mapping_lower 
-ON version_control_mapping (LOWER(project_key), LOWER(repo_slug));
-
--- Ensure indexes on UI filter fields
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_host_name ON combined_repo_metrics (host_name);
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_activity_status ON combined_repo_metrics (activity_status);
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_tc ON combined_repo_metrics (tc);
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_main_language ON combined_repo_metrics (main_language);
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_classification_label ON combined_repo_metrics (classification_label);
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_app_id ON combined_repo_metrics (app_id);
-
--- Add GIN indexes for text search fields
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_main_language_gin 
-ON combined_repo_metrics USING GIN (main_language gin_trgm_ops);
-
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_classification_label_gin 
-ON combined_repo_metrics USING GIN (classification_label gin_trgm_ops);
-
-CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_app_id_gin 
-ON combined_repo_metrics USING GIN (app_id gin_trgm_ops);
-
--- Create the optimized materialized view
+-- Create the optimized materialized view first (before creating indexes)
 CREATE MATERIALIZED VIEW combined_repo_metrics AS
 WITH all_repos AS (
     SELECT DISTINCT repo_id FROM (
@@ -188,6 +156,24 @@ LEFT JOIN go_enry_agg e ON r.repo_id = e.repo_id
 LEFT JOIN all_languages_agg al ON r.repo_id = al.repo_id
 LEFT JOIN repo_metrics rm ON r.repo_id = rm.repo_id
 ORDER BY r.repo_id;
+
+-- Create indexes only after the materialized view is created
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_host_name ON combined_repo_metrics (host_name);
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_activity_status ON combined_repo_metrics (activity_status);
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_tc ON combined_repo_metrics (tc);
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_main_language ON combined_repo_metrics (main_language);
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_classification_label ON combined_repo_metrics (classification_label);
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_app_id ON combined_repo_metrics (app_id);
+
+-- Add GIN indexes for text search fields
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_main_language_gin 
+ON combined_repo_metrics USING GIN (main_language gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_classification_label_gin 
+ON combined_repo_metrics USING GIN (classification_label gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_combined_repo_metrics_app_id_gin 
+ON combined_repo_metrics USING GIN (app_id gin_trgm_ops);
 
 -- Ensure unique index for fast concurrent refresh
 CREATE UNIQUE INDEX IF NOT EXISTS idx_combined_repo_metrics_repo_id ON combined_repo_metrics(repo_id);
