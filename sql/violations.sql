@@ -31,5 +31,6 @@ ORDER BY crm.repo_id, v.id;
 
 CREATE INDEX IF NOT EXISTS idx_combined_repo_violations_label_key ON combined_repo_violations(label_key);
 CREATE INDEX IF NOT EXISTS idx_combined_repo_violations_label_composite ON combined_repo_violations(label_key, label_value, repo_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_combined_repo_violations_unique ON combined_repo_violations(repo_id, violation_id, label_key, label_value);
 
 REFRESH MATERIALIZED VIEW CONCURRENTLY combined_repo_violations;
