@@ -117,6 +117,7 @@ SELECT
     b.clone_url_ssh,
     b.status,
     c.source_code_file_count,
+    rm.number_of_contributors,
     t.total_trivy_vulns,
     s.total_semgrep_findings,
     e.language_count,
