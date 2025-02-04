@@ -1,3 +1,9 @@
+-- Enable the pg_trgm extension for GIN indexes
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- Drop the materialized view and its dependencies
+DROP MATERIALIZED VIEW IF EXISTS combined_repo_metrics CASCADE;
+
 -- Ensure indexes exist on frequently joined tables to speed up joins and aggregations
 CREATE INDEX IF NOT EXISTS idx_lizard_summary_repo_id ON lizard_summary(repo_id);
 CREATE INDEX IF NOT EXISTS idx_cloc_metrics_repo_id ON cloc_metrics(repo_id);
