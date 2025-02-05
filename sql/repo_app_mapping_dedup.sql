@@ -15,8 +15,9 @@ WITH distinct_business_apps AS (
              string_agg(DISTINCT dba.identifier, ', ') AS app_identifiers
          FROM
              component_mapping vc
-                 LEFT JOIN distinct_business_apps dba
-                           ON vc.component_id = dba.component_id
+                 LEFT JOIN
+             distinct_business_apps dba
+             ON vc.component_id = dba.component_id
          WHERE
              vc.mapping_type = 'version_control'
          GROUP BY
@@ -29,10 +30,23 @@ WITH distinct_business_apps AS (
              vc.web_url
          HAVING
              COUNT(dba.identifier) > 0
+     ),
+     dupe_repo_ids AS (
+         SELECT
+             repo_id
+         FROM
+             result
+         GROUP BY
+             repo_id
+         HAVING
+             COUNT(*) > 1
      )
 SELECT
-    repo_id,
-    COUNT(*) AS duplicate_count
-FROM result
-GROUP BY repo_id
-HAVING COUNT(*) > 1;
+    r.*
+FROM
+    result r
+        JOIN
+    dupe_repo_ids d
+    ON r.repo_id = d.repo_id
+ORDER BY
+    r.repo_id;
