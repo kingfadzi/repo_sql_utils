@@ -7,11 +7,11 @@ SELECT
     (vc.project_key || '/' || vc.repo_slug) AS repo_id,
     vc.component_id,
     vc.component_name,
-    vc.transaction_cycle,
+    string_agg(DISTINCT vc.transaction_cycle, ', ') AS transaction_cycle,
     vc.name AS version_control_name,
     vc.identifier AS version_control_identifier,
     vc.web_url,
-    string_agg(dba.identifier, ', ') AS app_identifiers
+    string_agg(DISTINCT dba.identifier, ', ') AS app_identifiers
 FROM
     component_mapping vc
         LEFT JOIN
@@ -24,7 +24,6 @@ GROUP BY
     vc.repo_slug,
     vc.component_id,
     vc.component_name,
-    vc.transaction_cycle,
     vc.name,
     vc.identifier,
     vc.web_url
