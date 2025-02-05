@@ -30,23 +30,10 @@ WITH distinct_business_apps AS (
              vc.web_url
          HAVING
              COUNT(dba.identifier) > 0
-     ),
-     dupe_repo_ids AS (
-         SELECT
-             repo_id
-         FROM
-             result
-         GROUP BY
-             repo_id
-         HAVING
-             COUNT(*) > 1
      )
 SELECT
-    r.*
-FROM
-    result r
-        JOIN
-    dupe_repo_ids d
-    ON r.repo_id = d.repo_id
-ORDER BY
-    r.repo_id;
+    repo_id,
+    COUNT(*) AS occurrence_count
+FROM result
+GROUP BY repo_id
+HAVING COUNT(*) > 1;
