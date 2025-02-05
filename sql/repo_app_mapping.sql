@@ -6,7 +6,7 @@ SELECT
     vc.name AS version_control_name,
     vc.identifier AS version_control_identifier,
     vc.web_url,
-    string_agg(ba.identifier, ', ') AS app_identifiers
+    string_agg(DISTINCT ba.identifier, ', ') AS app_identifiers
 FROM
     component_mapping vc
         LEFT JOIN
@@ -23,4 +23,6 @@ GROUP BY
     vc.transaction_cycle,
     vc.name,
     vc.identifier,
-    vc.web_url;
+    vc.web_url
+HAVING
+    COUNT(ba.identifier) > 0;
