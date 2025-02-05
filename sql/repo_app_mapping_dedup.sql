@@ -15,11 +15,13 @@ WITH distinct_business_apps AS (
              string_agg(DISTINCT dba.identifier, ', ') AS app_identifiers
          FROM
              component_mapping vc
-                 LEFT JOIN
-             distinct_business_apps dba
-             ON vc.component_id = dba.component_id
+                 LEFT JOIN distinct_business_apps dba
+                           ON vc.component_id = dba.component_id
          WHERE
              vc.mapping_type = 'version_control'
+           -- Exclude rows where either project_key or repo_slug is blank or null.
+           AND COALESCE(vc.project_key, '') <> ''
+           AND COALESCE(vc.repo_slug, '') <> ''
          GROUP BY
              vc.project_key,
              vc.repo_slug,
@@ -31,9 +33,6 @@ WITH distinct_business_apps AS (
          HAVING
              COUNT(dba.identifier) > 0
      )
-SELECT
-    repo_id,
-    COUNT(*) AS occurrence_count
+SELECT *
 FROM result
-GROUP BY repo_id
-HAVING COUNT(*) > 1;
+ORDER BY repo_id;
