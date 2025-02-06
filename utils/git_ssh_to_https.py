@@ -21,19 +21,20 @@ def convert_ssh_to_https(ssh_url):
 
 def convert_csv(input_file, output_file):
     with open(input_file, mode='r') as infile, open(output_file, mode='w', newline='') as outfile:
-        reader = csv.reader(infile)
-        writer = csv.writer(outfile)
+        reader = csv.DictReader(infile)
+        fieldnames = reader.fieldnames + ['clone_url_https']
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
 
-        header = next(reader)
-        writer.writerow(header + ['https_clone_url'])
+        writer.writeheader()
 
         for row in reader:
-            ssh_url = row[0]
+            ssh_url = row['clone_url_ssh']
             https_url = convert_ssh_to_https(ssh_url)
-            writer.writerow(row + [https_url])
+            row['clone_url_https'] = https_url
+            writer.writerow(row)
 
 if __name__ == "__main__":
-    input_file = 'input.csv'
-    output_file = 'output.csv'
+    input_file = 'input.csv'  # Path to your input CSV file
+    output_file = 'output.csv'  # Path to your output CSV file
     convert_csv(input_file, output_file)
     print("Conversion completed!")
