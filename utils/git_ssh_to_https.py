@@ -12,9 +12,9 @@ def convert_ssh_to_https(ssh_url):
         host = host_and_path[0]
         path = host_and_path[1]
 
-        project, repository = path.split("/", 1)
+        project, slug = path.split("/", 1)
 
-        return f"https://{host}/scm/{project}/{repository}.git"
+        return f"https://{host}/scm/{project}/{slug}.git"
     else:
         print(f"Invalid URL format: {ssh_url}")
         return ssh_url
