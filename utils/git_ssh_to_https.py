@@ -16,7 +16,8 @@ def convert_ssh_to_https(ssh_url):
 
         return f"https://{host}/scm/{project}/{repository}.git"
     else:
-        raise ValueError("Invalid SSH URL format")
+        print(f"Invalid URL format: {ssh_url}")
+        return ssh_url
 
 def convert_csv(input_file, output_file):
     with open(input_file, mode='r') as infile, open(output_file, mode='w', newline='') as outfile:
