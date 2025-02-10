@@ -292,3 +292,19 @@ CREATE TABLE kantra_violation_labels (
      label_id INT NOT NULL,
      PRIMARY KEY (violation_id, label_id)
 );
+
+CREATE TABLE dependencies (
+      id SERIAL PRIMARY KEY,
+      repo_id TEXT NOT NULL,
+      name VARCHAR NOT NULL,
+      version VARCHAR NOT NULL,
+      type VARCHAR,
+      cpe VARCHAR,
+      purl VARCHAR,
+      found_by VARCHAR,
+      language VARCHAR,
+      package_type VARCHAR,
+      metadata_type VARCHAR,
+      location TEXT,
+      UNIQUE (repo_id, name, version)
+);
