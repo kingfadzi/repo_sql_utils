@@ -295,16 +295,9 @@ CREATE TABLE kantra_violation_labels (
 
 CREATE TABLE dependencies (
       id SERIAL PRIMARY KEY,
-      repo_id TEXT NOT NULL,
+      repo_id VARCHAR NOT NULL,
       name VARCHAR NOT NULL,
       version VARCHAR NOT NULL,
-      type VARCHAR,
-      cpe VARCHAR,
-      purl VARCHAR,
-      found_by VARCHAR,
-      language VARCHAR,
-      package_type VARCHAR,
-      metadata_type VARCHAR,
-      location TEXT,
-      UNIQUE (repo_id, name, version)
+      package_type VARCHAR NOT NULL,
+      CONSTRAINT uq_repo_name_version UNIQUE (repo_id, name, version)
 );
