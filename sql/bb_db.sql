@@ -201,6 +201,13 @@ CREATE TABLE analysis_execution_log (
     duration FLOAT NOT NULL
 );
 
+CREATE INDEX idx_analysis_log_method_name ON analysis_execution_log (method_name);
+CREATE INDEX idx_analysis_log_stage      ON analysis_execution_log (stage);
+CREATE INDEX idx_analysis_log_run_id     ON analysis_execution_log (run_id);
+CREATE INDEX idx_analysis_log_repo_id    ON analysis_execution_log (repo_id);
+CREATE INDEX idx_analysis_log_status     ON analysis_execution_log (status);
+
+
 CREATE TABLE semgrep_results (
      id SERIAL PRIMARY KEY,
      repo_id VARCHAR NOT NULL,
