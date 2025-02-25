@@ -2,6 +2,7 @@ import psycopg2
 import requests
 import sys
 from datetime import datetime
+from dateutil.parser import parse
 
 # Database configuration
 DB_CONFIG = {
@@ -63,6 +64,19 @@ def get_or_create_product(conn, product_name):
         )
         return cursor.fetchone()[0]
 
+def validate_date(date_value):
+    """Convert various date formats to ISO date or return None"""
+    if isinstance(date_value, bool):
+        return None
+    
+    if not date_value:
+        return None
+
+    try:
+        return parse(date_value).date().isoformat()
+    except (ValueError, TypeError):
+        return None
+
 def process_product(conn, product_name):
     """Fetch and insert versions for a single product"""
     try:
@@ -74,7 +88,7 @@ def process_product(conn, product_name):
         return None
 
 def insert_versions(conn, product_id, versions):
-    """Bulk insert versions for a product"""
+    """Bulk insert versions for a product with proper type validation"""
     insert_sql = """
     INSERT INTO product_versions (
         product_id, cycle, eol_date, latest_version, release_date, lts
@@ -85,22 +99,31 @@ def insert_versions(conn, product_id, versions):
         release_date = EXCLUDED.release_date,
         lts = EXCLUDED.lts
     """
-    try:
-        with conn.cursor() as cursor:
-            for version in versions:
+    
+    success = True
+    with conn.cursor() as cursor:
+        for version in versions:
+            try:
+                # Validate and convert dates
+                eol_date = validate_date(version.get('eol'))
+                release_date = validate_date(version.get('releaseDate'))
+                
                 cursor.execute(insert_sql, (
                     product_id,
-                    version.get('cycle'),
-                    version.get('eol'),
+                    str(version.get('cycle', '')),
+                    eol_date,
                     version.get('latest'),
-                    version.get('releaseDate'),
-                    version.get('lts', False)
+                    release_date,
+                    bool(version.get('lts', False))
                 ))
-        return True
-    except Exception as e:
-        print(f"\nDatabase error: {str(e)}")
-        conn.rollback()
-        return False
+            except Exception as e:
+                print(f"\nError inserting version {version.get('cycle')}: {str(e)}")
+                print(f"Problematic data: {version}")
+                success = False
+                conn.rollback()
+                continue
+                
+    return success
 
 def main():
     start_time = datetime.now()
@@ -171,9 +194,10 @@ if __name__ == "__main__":
     try:
         import psycopg2
         import requests
+        from dateutil.parser import parse
     except ImportError as e:
         print(f"Missing dependencies: {str(e)}")
-        print("Run: pip install psycopg2-binary requests")
+        print("Run: pip install psycopg2-binary requests python-dateutil")
         sys.exit(1)
     
     main()
