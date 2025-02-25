@@ -308,3 +308,29 @@ CREATE TABLE dependencies (
       package_type VARCHAR NOT NULL,
       CONSTRAINT uq_repo_name_version UNIQUE (repo_id, name, version)
 );
+
+-- Products Table
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    product_type VARCHAR(50),
+    vendor VARCHAR(100),
+    CONSTRAINT unique_product_name UNIQUE (name)
+);
+
+-- Product Versions Table
+CREATE TABLE product_versions (
+    version_id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
+    cycle VARCHAR(20) NOT NULL,
+    eol_date DATE,
+    latest_version VARCHAR(50),
+    release_date DATE,
+    lts BOOLEAN DEFAULT false,
+    CONSTRAINT unique_product_version UNIQUE (product_id, cycle)
+);
+
+-- Index for common queries
+CREATE INDEX idx_product_eol_date ON product_versions(eol_date);
+CREATE INDEX idx_product_release_date ON product_versions(release_date);
+
