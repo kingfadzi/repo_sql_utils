@@ -48,18 +48,19 @@ def create_tables(conn):
     conn.commit()
 
 def get_or_create_product(conn, product_name):
-    """Get existing product ID or insert new product"""
+    """Get existing product ID or insert new product using upsert.
+    
+    We use ON CONFLICT ... DO UPDATE so that a product row is always returned.
+    """
     with conn.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO products (name) VALUES (%s) ON CONFLICT (name) DO NOTHING RETURNING product_id",
-            (product_name,)
-        )
-        result = cursor.fetchone()
-        if result:
-            return result[0]
-        
-        cursor.execute(
-            "SELECT product_id FROM products WHERE name = %s",
+            """
+            INSERT INTO products (name)
+            VALUES (%s)
+            ON CONFLICT (name)
+            DO UPDATE SET name = EXCLUDED.name
+            RETURNING product_id
+            """,
             (product_name,)
         )
         return cursor.fetchone()[0]
@@ -68,10 +69,8 @@ def validate_date(date_value):
     """Convert various date formats to ISO date or return None"""
     if isinstance(date_value, bool):
         return None
-    
     if not date_value:
         return None
-
     try:
         return parse(date_value).date().isoformat()
     except (ValueError, TypeError):
@@ -88,7 +87,11 @@ def process_product(conn, product_name):
         return None
 
 def insert_versions(conn, product_id, versions):
-    """Bulk insert versions for a product with proper type validation"""
+    """Bulk insert versions for a product with proper type validation.
+    
+    Uses a savepoint for each version insert so that an error only
+    rolls back the individual insert instead of the whole transaction.
+    """
     insert_sql = """
     INSERT INTO product_versions (
         product_id, cycle, eol_date, latest_version, release_date, lts
@@ -104,6 +107,8 @@ def insert_versions(conn, product_id, versions):
     with conn.cursor() as cursor:
         for version in versions:
             try:
+                # Start a savepoint so we can rollback only this version if needed.
+                cursor.execute("SAVEPOINT sp")
                 # Validate and convert dates
                 eol_date = validate_date(version.get('eol'))
                 release_date = validate_date(version.get('releaseDate'))
@@ -116,13 +121,14 @@ def insert_versions(conn, product_id, versions):
                     release_date,
                     bool(version.get('lts', False))
                 ))
+                cursor.execute("RELEASE SAVEPOINT sp")
             except Exception as e:
                 print(f"\nError inserting version {version.get('cycle')}: {str(e)}")
                 print(f"Problematic data: {version}")
                 success = False
-                conn.rollback()
+                cursor.execute("ROLLBACK TO SAVEPOINT sp")
+                # We continue to process the remaining versions
                 continue
-                
     return success
 
 def main():
@@ -151,16 +157,16 @@ def main():
             try:
                 print(f"\rProcessing {idx}/{total_products}: {product_name.ljust(30)}", end="")
                 
-                # Get product data
+                # Fetch product versions
                 versions = process_product(conn, product_name)
                 if not versions:
                     error_count += 1
                     continue
                 
-                # Get/Create product
+                # Upsert product to ensure product_id exists
                 product_id = get_or_create_product(conn, product_name)
                 
-                # Insert versions
+                # Insert versions using upsert logic and savepoints
                 if insert_versions(conn, product_id, versions):
                     success_count += 1
                 
