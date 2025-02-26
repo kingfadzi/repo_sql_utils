@@ -326,3 +326,12 @@ CREATE TABLE xeol_results (
       language VARCHAR,
       CONSTRAINT _xeol_result_uc UNIQUE (repo_id, artifact_name, artifact_version)
 );
+
+CREATE TABLE build_tools (
+     id SERIAL PRIMARY KEY,
+     repo_id VARCHAR NOT NULL,
+     tool VARCHAR NOT NULL,
+     tool_version VARCHAR,
+     runtime_version VARCHAR,
+     CONSTRAINT _build_tools_uc UNIQUE (repo_id, tool)
+);
