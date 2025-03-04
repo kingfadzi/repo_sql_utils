@@ -43,7 +43,8 @@ def get_compiled_rules(package_type):
     return compiled_rules_cache[rule_file]
 
 def main():
-    # Database setup: connect to the PostgreSQL database using the provided credentials.
+    # Database setup: connect to the PostgreSQL database.
+    # Credentials: postgres:postgres, host: 192.168.1.188, port: 5422, database: gitlab-usage
     engine = create_engine('postgresql://postgres:postgres@192.168.1.188:5422/gitlab-usage')
     
     # Load the dependencies table into a DataFrame.
@@ -70,8 +71,10 @@ def main():
         
         df.loc[group.index, 'technology_category'] = categories
     
-    # Output the resulting DataFrame to STDOUT.
-    print(df[['repo_id', 'name', 'version', 'package_type', 'technology_category']])
+    # Write the resulting DataFrame to a CSV file.
+    output_file = "categorized_dependencies.csv"
+    df[['repo_id', 'name', 'version', 'package_type', 'technology_category']].to_csv(output_file, index=False)
+    print(f"Results written to {output_file}")
 
 if __name__ == '__main__':
     main()
