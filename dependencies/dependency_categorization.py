@@ -43,8 +43,8 @@ def get_compiled_rules(package_type):
     return compiled_rules_cache[rule_file]
 
 def main():
-    # Database setup: update with your actual PostgreSQL credentials and database name.
-    engine = create_engine('postgresql://user:password@localhost:5432/dbname')
+    # Database setup: connect to the PostgreSQL database using the provided credentials.
+    engine = create_engine('postgresql://postgres:postgres@192.168.1.188:5422/gitlab-usage')
     
     # Load the dependencies table into a DataFrame.
     # Expected columns: id, repo_id, name, version, package_type (all lower case)
