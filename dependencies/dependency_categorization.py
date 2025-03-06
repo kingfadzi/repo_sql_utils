@@ -108,4 +108,21 @@ def process_data():
     with engine.connect() as conn:
         for chunk_idx, chunk in enumerate(pd.read_sql(query, con=conn, chunksize=CHUNK_SIZE)):
             chunk_start_time = time.time()
-            logging.info(f"Processing chunk {chunk_idx + 1} (size: {len(chunk
+            logging.info(f"Processing chunk {chunk_idx + 1} (size: {len(chunk)})...")
+            
+            chunk = apply_categorization(chunk)
+
+            # Write output (append mode)
+            chunk.to_parquet(OUTPUT_FILE, engine="fastparquet", index=False, compression="snappy", append=not first_chunk)
+            first_chunk = False
+            total_rows += len(chunk)
+
+            chunk_duration = time.time() - chunk_start_time
+            logging.info(f"Chunk {chunk_idx + 1} processed in {chunk_duration:.2f} seconds")
+
+    total_duration = time.time() - start_time
+    logging.info(f"Processing complete: {total_rows} rows processed in {total_duration:.2f} seconds")
+    print(f"Processing complete. Output written to {OUTPUT_FILE}")
+
+if __name__ == '__main__':
+    process_data()
