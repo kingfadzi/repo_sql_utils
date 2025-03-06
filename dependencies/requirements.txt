@@ -2,3 +2,4 @@ pandas
 PyYAML
 SQLAlchemy
 psycopg2-binary
+fastparquet
