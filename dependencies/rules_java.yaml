@@ -1,12 +1,16 @@
 categories:
   - name: "Database & Persistence"
-    patterns:
-      - ".*mysql.*"
-      - ".*postgresql.*"
-      - ".*h2.*"
-      - "org\\.hibernate.*"
-      - "com\\.oracle.*"
-      - "org\\.mongodb.*"
+    subcategories:
+      - name: "SQL"
+        patterns:
+          - ".*mysql.*"
+          - ".*postgresql.*"
+          - ".*h2.*"
+          - "org\\.hibernate.*"
+          - "com\\.oracle.*"
+      - name: "NoSQL"
+        patterns:
+          - "org\\.mongodb.*"
   - name: "Messaging & Event Streaming"
     patterns:
       - "org\\.apache\\.kafka.*"
@@ -15,13 +19,24 @@ categories:
       - "com\\.rabbitmq.*"
       - "org\\.apache\\.activemq.*"
   - name: "Web & Application Frameworks"
-    patterns:
-      - "org\\.springframework\\.boot.*"
-      - "org\\.springframework\\.web.*"
-      - "jakarta\\.servlet.*"
-      - "javax\\.servlet.*"
-      - "org\\.apache\\.struts.*"
-      - "org\\.jsf.*"
+    subcategories:
+      - name: "Spring: Boot"
+        patterns:
+          - "^org\\.springframework\\.boot.*"
+          - "^spring-boot.*"
+      - name: "Spring: Framework"
+        patterns:
+          - "^org\\.springframework\\.(?!boot).*"
+          - "^spring-framework.*"
+          - "^spring-core.*"
+          - "^spring-context.*"
+          - "^spring-web.*"
+      - name: "Other Web Frameworks"
+        patterns:
+          - "jakarta\\.servlet.*"
+          - "javax\\.servlet.*"
+          - "org\\.apache\\.struts.*"
+          - "org\\.jsf.*"
   - name: "Application Servers & Runtime Containers"
     patterns:
       - "org\\.apache\\.tomcat.*"

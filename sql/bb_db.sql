@@ -305,6 +305,8 @@ CREATE TABLE dependencies (
       repo_id VARCHAR NOT NULL,
       name VARCHAR NOT NULL,
       version VARCHAR NOT NULL,
+      category VARCHAR,
+      sub_category VARCHAR,
       package_type VARCHAR NOT NULL,
       CONSTRAINT uq_repo_name_version UNIQUE (repo_id, name, version)
 );
