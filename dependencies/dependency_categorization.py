@@ -6,13 +6,13 @@ import os
 from sqlalchemy import create_engine
 
 # Constants
-CHUNK_SIZE = 50000  # Adjust based on memory availability
-OUTPUT_FILE = "categorized_dependencies.csv"
+CHUNK_SIZE = 50000  
+OUTPUT_FILE = "categorized_dependencies.parquet"
 
 # Database connection
 engine = create_engine('postgresql://postgres:postgres@192.168.1.188:5422/gitlab-usage')
 
-# Mapping package types to YAML rule files
+# Rule file mappings
 RULES_MAPPING = {
     "pip": "rules_python.yaml",
     "maven": "rules_java.yaml",
@@ -22,7 +22,7 @@ RULES_MAPPING = {
     "go": "rules_go.yaml"
 }
 
-# Cache compiled regex rules
+# Cache compiled rules
 compiled_rules_cache = {}
 
 def load_rules(rule_file):
@@ -33,7 +33,7 @@ def load_rules(rule_file):
         return [
             (re.compile(pattern, re.IGNORECASE), cat['name'], sub.get('name', ""))
             for cat in rules.get('categories', [])
-            for sub in cat.get('subcategories', [{"name": ""}])  # Handle categories without subcategories
+            for sub in cat.get('subcategories', [{"name": ""}]) 
             for pattern in sub.get('patterns', cat.get('patterns', []))
         ]
     except Exception as e:
@@ -50,34 +50,45 @@ def get_compiled_rules(package_type):
     return compiled_rules_cache[rule_file]
 
 def apply_categorization(df):
-    """Categorize dependencies using vectorized regex matching."""
+    """Batch categorization using vectorized regex."""
     df["category"], df["sub_category"] = "Other", ""
+
+    package_types = df["package_type"].unique()
     
-    for pkg_type in df["package_type"].unique():
+    for pkg_type in package_types:
         compiled_rules = get_compiled_rules(pkg_type)
         if not compiled_rules:
             continue
         
-        for regex, top_cat, sub_cat in compiled_rules:
-            matches = df["name"].str.contains(regex, na=False)
-            df.loc[matches & (df["category"] == "Other"), ["category", "sub_category"]] = (top_cat, sub_cat)
-    
+        regex_patterns, categories, sub_categories = zip(*compiled_rules)
+
+        # Single regex pattern
+        full_regex = "|".join(f"({pattern.pattern})" for pattern in regex_patterns)
+        matches = df["name"].str.extract(full_regex, expand=False)
+        
+        for i, col in enumerate(matches.columns):
+            matched_rows = matches[col].notna()
+            df.loc[matched_rows & (df["category"] == "Other"), ["category", "sub_category"]] = (
+                categories[i], sub_categories[i]
+            )
+
     return df
 
 def process_data():
-    """Reads, categorizes, and processes data in chunks."""
+    """Reads and processes data in chunks."""
     query = """
         SELECT d.repo_id, d.name, d.version, d.package_type, 
                b.tool, b.tool_version, b.runtime_version
         FROM dependencies d 
         LEFT JOIN build_tools b ON d.repo_id = b.repo_id
+        WHERE d.package_type IS NOT NULL
     """
 
     first_chunk = True
     with engine.connect() as conn:
         for chunk in pd.read_sql(query, con=conn, chunksize=CHUNK_SIZE):
-            categorized_chunk = apply_categorization(chunk)
-            categorized_chunk.to_csv(OUTPUT_FILE, mode='a', index=False, header=first_chunk)
+            chunk = apply_categorization(chunk)
+            chunk.to_parquet(OUTPUT_FILE, engine="fastparquet", index=False, compression="snappy", append=not first_chunk)
             first_chunk = False
 
     print(f"Processing complete. Output written to {OUTPUT_FILE}")
