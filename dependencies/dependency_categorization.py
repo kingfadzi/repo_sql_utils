@@ -1,30 +1,17 @@
-#!/usr/bin/env python3
+from modular.shared.models import Session
+from config.config import Config
+from modular.shared.base_logger import BaseLogger
 import pandas as pd
 import re
 import yaml
-import os
-import logging
 import time
-from sqlalchemy import create_engine
+import logging
 
-# 🔹 Set up logging
-logging.basicConfig(
-    filename="categorization.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
-logging.getLogger().addHandler(console)
-
-# 🔹 Constants
+# Constants
 CHUNK_SIZE = 50000
-OUTPUT_FILE = "categorized_dependencies.parquet"
+MATERIALIZED_VIEW = "categorized_dependencies_mv"
 
-# 🔹 Database connection
-engine = create_engine('postgresql://postgres:postgres@192.168.1.188:5422/gitlab-usage')
-
-# 🔹 Mapping package types to YAML rule files
+# Mapping package types to YAML rule files
 RULES_MAPPING = {
     "pip": "rules_python.yaml",
     "maven": "rules_java.yaml",
@@ -34,95 +21,109 @@ RULES_MAPPING = {
     "go": "rules_go.yaml"
 }
 
-# 🔹 Cache compiled rules
+# Cache compiled rules
 compiled_rules_cache = {}
 
-def load_rules(rule_file):
-    """Load YAML rules and compile regex patterns."""
-    try:
-        with open(rule_file, 'r') as f:
-            rules = yaml.safe_load(f)
-        compiled_list = [
-            (re.compile(pattern, re.IGNORECASE), cat['name'], sub.get('name', ""))
-            for cat in rules.get('categories', [])
-            for sub in cat.get('subcategories', [{"name": ""}]) 
-            for pattern in sub.get('patterns', cat.get('patterns', []))
-        ]
-        logging.info(f"Loaded {len(compiled_list)} rules from {rule_file}")
-        return compiled_list
-    except Exception as e:
-        logging.error(f"Error loading {rule_file}: {e}")
-        return []
+class DependencyCategorizer(BaseLogger):
+    def __init__(self, logger=None):
+        """Initialize the Dependency Categorizer with logging."""
+        if logger is None:
+            self.logger = self.get_logger("DependencyCategorizer")
+        else:
+            self.logger = logger
+        self.logger.setLevel(logging.DEBUG)
 
-def get_compiled_rules(package_type):
-    """Retrieve compiled rules for a package type with caching."""
-    rule_file = RULES_MAPPING.get(package_type.lower())
-    if not rule_file:
-        return []
-    if rule_file not in compiled_rules_cache:
-        compiled_rules_cache[rule_file] = load_rules(rule_file)
-    return compiled_rules_cache[rule_file]
+    def load_rules(self, rule_file):
+        """Load YAML rules and compile regex patterns."""
+        try:
+            with open(rule_file, 'r') as f:
+                rules = yaml.safe_load(f)
+            compiled_list = [
+                (re.compile(pattern, re.IGNORECASE), cat['name'], sub.get('name', ""))
+                for cat in rules.get('categories', [])
+                for sub in cat.get('subcategories', [{"name": ""}]) 
+                for pattern in sub.get('patterns', cat.get('patterns', []))
+            ]
+            self.logger.info(f"Loaded {len(compiled_list)} rules from {rule_file}")
+            return compiled_list
+        except Exception as e:
+            self.logger.error(f"Error loading {rule_file}: {e}")
+            return []
 
-def apply_categorization(df):
-    """Batch categorize dependencies using vectorized regex."""
-    start_time = time.time()
-    df["category"], df["sub_category"] = "Other", ""
+    def get_compiled_rules(self, package_type):
+        """Retrieve compiled rules for a package type with caching."""
+        rule_file = RULES_MAPPING.get(package_type.lower())
+        if not rule_file:
+            return []
+        if rule_file not in compiled_rules_cache:
+            compiled_rules_cache[rule_file] = self.load_rules(rule_file)
+        return compiled_rules_cache[rule_file]
 
-    package_types = df["package_type"].unique()
-    
-    for pkg_type in package_types:
-        compiled_rules = get_compiled_rules(pkg_type)
-        if not compiled_rules:
-            continue
+    def apply_categorization(self, df):
+        """Batch categorize dependencies using vectorized regex."""
+        start_time = time.time()
+        df["category"], df["sub_category"] = "Other", ""
 
-        regex_patterns, categories, sub_categories = zip(*compiled_rules)
-        full_regex = "|".join(f"({pattern.pattern})" for pattern in regex_patterns)
-        matches = df["name"].str.extract(full_regex, expand=False)
+        package_types = df["package_type"].unique()
+        
+        for pkg_type in package_types:
+            compiled_rules = self.get_compiled_rules(pkg_type)
+            if not compiled_rules:
+                continue
 
-        for i, col in enumerate(matches.columns):
-            matched_rows = matches[col].notna()
-            df.loc[matched_rows & (df["category"] == "Other"), ["category", "sub_category"]] = (
-                categories[i], sub_categories[i]
-            )
+            regex_patterns, categories, sub_categories = zip(*compiled_rules)
+            full_regex = "|".join(f"({pattern.pattern})" for pattern in regex_patterns)
+            matches = df["name"].str.extract(full_regex, expand=False)
 
-    duration = time.time() - start_time
-    logging.info(f"Categorization completed for {len(df)} rows in {duration:.2f} seconds")
-    return df
+            for i, col in enumerate(matches.columns):
+                matched_rows = matches[col].notna()
+                df.loc[matched_rows & (df["category"] == "Other"), ["category", "sub_category"]] = (
+                    categories[i], sub_categories[i]
+                )
 
-def process_data():
-    """Reads, categorizes, and processes data in chunks."""
-    logging.info("Starting data processing...")
-    
-    query = """
-        SELECT d.repo_id, d.name, d.version, d.package_type, 
-               b.tool, b.tool_version, b.runtime_version
-        FROM dependencies d 
-        LEFT JOIN build_tools b ON d.repo_id = b.repo_id
-        WHERE d.package_type IS NOT NULL
-    """
+        duration = time.time() - start_time
+        self.logger.info(f"Categorization completed for {len(df)} rows in {duration:.2f} seconds")
+        return df
 
-    first_chunk = True
-    total_rows = 0
-    start_time = time.time()
+    def process_data(self):
+        """Reads, categorizes, and processes data in chunks, then writes to the materialized view."""
+        self.logger.info("Starting data processing...")
 
-    with engine.connect() as conn:
-        for chunk_idx, chunk in enumerate(pd.read_sql(query, con=conn, chunksize=CHUNK_SIZE)):
-            chunk_start_time = time.time()
-            logging.info(f"Processing chunk {chunk_idx + 1} (size: {len(chunk)})...")
-            
-            chunk = apply_categorization(chunk)
+        query = """
+            SELECT d.repo_id, d.name, d.version, d.package_type, 
+                   b.tool, b.tool_version, b.runtime_version
+            FROM dependencies d 
+            LEFT JOIN build_tools b ON d.repo_id = b.repo_id
+            WHERE d.package_type IS NOT NULL
+        """
 
-            # Write output (append mode)
-            chunk.to_parquet(OUTPUT_FILE, engine="fastparquet", index=False, compression="snappy", append=not first_chunk)
-            first_chunk = False
-            total_rows += len(chunk)
+        total_rows = 0
+        start_time = time.time()
 
-            chunk_duration = time.time() - chunk_start_time
-            logging.info(f"Chunk {chunk_idx + 1} processed in {chunk_duration:.2f} seconds")
+        with Session() as session:
+            session.execute(f"TRUNCATE {MATERIALIZED_VIEW};")  # Clear existing data before inserting new results
 
-    total_duration = time.time() - start_time
-    logging.info(f"Processing complete: {total_rows} rows processed in {total_duration:.2f} seconds")
-    print(f"Processing complete. Output written to {OUTPUT_FILE}")
+            for chunk_idx, chunk in enumerate(pd.read_sql(query, con=session.connection(), chunksize=CHUNK_SIZE)):
+                chunk_start_time = time.time()
+                self.logger.info(f"Processing chunk {chunk_idx + 1} (size: {len(chunk)})...")
+
+                chunk = self.apply_categorization(chunk)
+
+                # Insert chunk into materialized view
+                chunk.to_sql(MATERIALIZED_VIEW, con=session.connection(), if_exists="append", index=False)
+
+                total_rows += len(chunk)
+                chunk_duration = time.time() - chunk_start_time
+                self.logger.info(f"Chunk {chunk_idx + 1} processed in {chunk_duration:.2f} seconds")
+
+            # Refresh the materialized view
+            session.execute(f"REFRESH MATERIALIZED VIEW {MATERIALIZED_VIEW};")
+            session.commit()
+
+        total_duration = time.time() - start_time
+        self.logger.info(f"Processing complete: {total_rows} rows processed in {total_duration:.2f} seconds")
+        print(f"Processing complete. Materialized view updated.")
 
 if __name__ == '__main__':
-    process_data()
+    categorizer = DependencyCategorizer()
+    categorizer.process_data()
