@@ -337,3 +337,19 @@ CREATE TABLE build_tools (
      runtime_version VARCHAR,
      CONSTRAINT _build_tools_uc UNIQUE (repo_id, tool)
 );
+
+DROP MATERIALIZED VIEW IF EXISTS categorized_dependencies_mv;
+CREATE MATERIALIZED VIEW categorized_dependencies_mv AS
+SELECT 
+    repo_id, 
+    name, 
+    version, 
+    package_type, 
+    'Other' AS category, 
+    '' AS sub_category, 
+    tool, 
+    tool_version, 
+    runtime_version
+FROM dependencies 
+LEFT JOIN build_tools USING (repo_id)
+WITH NO DATA;
