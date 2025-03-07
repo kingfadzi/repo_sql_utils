@@ -345,8 +345,8 @@ SELECT
     name, 
     version, 
     package_type, 
-    'Other' AS category, 
-    '' AS sub_category, 
+    category, 
+    sub_category, 
     tool, 
     tool_version, 
     runtime_version
