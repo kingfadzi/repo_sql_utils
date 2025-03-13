@@ -115,3 +115,29 @@ CASE
     WHEN value > 80 THEN '81-100%'
     ELSE 'Unknown'
 END AS value_bucket
+
+
+CASE
+    -- Still supported versions
+    WHEN months_since_eol <= 0 THEN 'Supported'
+
+    -- Recent EOL (within 1 year)
+    WHEN months_since_eol BETWEEN 1 AND 3 THEN '1-3 months'
+    WHEN months_since_eol BETWEEN 4 AND 6 THEN '4-6 months'
+    WHEN months_since_eol BETWEEN 7 AND 9 THEN '7-9 months'
+    WHEN months_since_eol BETWEEN 10 AND 12 THEN '10-12 months'
+
+    -- Older EOL (1+ years)
+    WHEN months_since_eol BETWEEN 13 AND 24 THEN '1-2 years'
+    WHEN months_since_eol BETWEEN 25 AND 36 THEN '2-3 years'
+    WHEN months_since_eol BETWEEN 37 AND 48 THEN '3-4 years'
+    WHEN months_since_eol BETWEEN 49 AND 60 THEN '4-5 years'
+    WHEN months_since_eol BETWEEN 61 AND 72 THEN '5-6 years'
+    WHEN months_since_eol BETWEEN 73 AND 84 THEN '6-7 years'
+    WHEN months_since_eol BETWEEN 85 AND 96 THEN '7-8 years'
+    WHEN months_since_eol BETWEEN 97 AND 108 THEN '8-9 years'
+    WHEN months_since_eol BETWEEN 109 AND 120 THEN '9-10 years'
+    WHEN months_since_eol > 120 THEN '10+ years'
+
+    ELSE 'Unknown'
+END AS eol_bucket
