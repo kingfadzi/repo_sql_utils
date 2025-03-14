@@ -37,4 +37,9 @@ SELECT
 FROM categorized_dependencies_mv
 WHERE package_type IN ('maven', 'gradle')
 GROUP BY part1, part2, part3
-ORDER BY total_occurrences DESC;
+ORDER BY
+    total_occurrences DESC,
+    part1 ASC NULLS LAST,
+    part2 ASC NULLS LAST,
+    part3 ASC NULLS LAST;
+
