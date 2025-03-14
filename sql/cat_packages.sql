@@ -18,3 +18,12 @@ GROUP BY
     SPLIT_PART(name, ':', 1)
 ORDER BY
     total_occurrences DESC;
+----
+
+SELECT
+    SPLIT_PART(name, ':', 1) AS group_id,
+    COUNT(DISTINCT repo_id) AS total_repos
+FROM categorized_dependencies_mv
+WHERE package_type IN ('maven', 'gradle')
+GROUP BY group_id
+ORDER BY total_repos DESC;
