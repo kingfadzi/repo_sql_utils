@@ -47,7 +47,7 @@ FROM combined_repo_metrics
 
 ---
 
-SELECT
+SELECT DISTINCT ON (
     crm.repo_id,
     crm.host_name,
     crm.clone_url_ssh,
@@ -58,18 +58,14 @@ SELECT
     crm.activity_status,
     crm.classification_label,
     crm.comment,
-    MIN(cdmv.runtime_version) AS runtime_version,
-    MIN(cdmv.tool_version) AS tool_version,
-    MIN(cdmv.tool) AS tool,
-    MIN(cdmv.sub_category) AS sub_category,
-    MIN(cdmv.category) AS category,
-    MIN(cdmv.package_type) AS package_type,
-    MIN(cdmv.version) AS version,
-    MIN(cdmv.name) AS name
-FROM combined_repo_metrics AS crm
-         LEFT JOIN categorized_dependencies_mv AS cdmv
-                   ON crm.repo_id = cdmv.repo_id
-GROUP BY
+    cdmv.runtime_version,
+    cdmv.tool_version,
+    cdmv.tool,
+    cdmv.sub_category,
+    cdmv.category,
+    cdmv.package_type,
+    cdmv.version
+    )
     crm.repo_id,
     crm.host_name,
     crm.clone_url_ssh,
@@ -79,4 +75,34 @@ GROUP BY
     crm.repo_size_bytes,
     crm.activity_status,
     crm.classification_label,
-    crm.comment;
+    crm.comment,
+    cdmv.runtime_version,
+    cdmv.tool_version,
+    cdmv.tool,
+    cdmv.sub_category,
+    cdmv.category,
+    cdmv.package_type,
+    cdmv.version,
+    cdmv.name
+FROM combined_repo_metrics AS crm
+    LEFT JOIN categorized_dependencies_mv AS cdmv
+ON crm.repo_id = cdmv.repo_id
+ORDER BY
+    crm.repo_id,
+    crm.host_name,
+    crm.clone_url_ssh,
+    crm.status,
+    crm.web_url,
+    crm.main_language,
+    crm.repo_size_bytes,
+    crm.activity_status,
+    crm.classification_label,
+    crm.comment,
+    cdmv.runtime_version,
+    cdmv.tool_version,
+    cdmv.tool,
+    cdmv.sub_category,
+    cdmv.category,
+    cdmv.package_type,
+    cdmv.version,
+    cdmv.name;
