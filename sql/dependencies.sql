@@ -19,4 +19,28 @@ FROM combined_repo_metrics cr
 ) dep_counts ON cr.repo_id = dep_counts.repo_id;
 
 
+----
+
+SELECT
+    combined_repo_metrics.repo_id,
+    combined_repo_metrics.host_name,
+    combined_repo_metrics.clone_url_ssh,
+    combined_repo_metrics.status,
+    combined_repo_metrics.web_url,
+    combined_repo_metrics.main_language,
+    combined_repo_metrics.repo_size_bytes,
+    combined_repo_metrics.activity_status,
+    combined_repo_metrics.classification_label,
+    combined_repo_metrics.comment,
+    cdmv.runtime_version,
+    cdmv.tool_version,
+    cdmv.tool,
+    cdmv.sub_category,
+    cdmv.category,
+    cdmv.package_type,
+    cdmv.version,
+    cdmv.name
+FROM combined_repo_metrics
+         LEFT JOIN categorized_dependencies_mv AS cdmv
+                   ON combined_repo_metrics.repo_id = cdmv.repo_id;
 
