@@ -140,4 +140,17 @@ CASE
     WHEN months_since_eol > 120 THEN '10+ years'
 
     ELSE 'Unknown'
-END AS eol_bucket
+END
+
+CASE
+    WHEN dependency_count = 0 THEN '0'
+    WHEN dependency_count BETWEEN 1 AND 10 THEN '1-10'
+    WHEN dependency_count BETWEEN 11 AND 20 THEN '11-20'
+    WHEN dependency_count BETWEEN 21 AND 40 THEN '21-40'
+    WHEN dependency_count BETWEEN 41 AND 100 THEN '41-100'
+    WHEN dependency_count BETWEEN 101 AND 200 THEN '101-200'
+    WHEN dependency_count BETWEEN 201 AND 500 THEN '201-500'
+    WHEN dependency_count BETWEEN 501 AND 1000 THEN '501-1000'
+    WHEN dependency_count BETWEEN 1001 AND 5000 THEN '1001-5000'
+    ELSE '5001+'
+END
