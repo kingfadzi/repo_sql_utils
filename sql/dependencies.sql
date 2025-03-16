@@ -8,6 +8,7 @@ SELECT
     cr.repo_size_bytes,
     cr.activity_status,
     COALESCE(bt.tool, 'None') AS build_tool,
+    bt.runtime_version,
     COALESCE(dep_counts.dependency_count, 0) AS dependency_count
 FROM combined_repo_metrics cr
          LEFT JOIN build_tools bt ON cr.repo_id = bt.repo_id
