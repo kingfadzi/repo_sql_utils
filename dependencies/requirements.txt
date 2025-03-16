@@ -3,3 +3,4 @@ PyYAML
 SQLAlchemy
 psycopg2-binary
 fastparquet
+requests
