@@ -335,21 +335,21 @@ CREATE TABLE build_tools (
      tool VARCHAR NOT NULL,
      tool_version VARCHAR,
      runtime_version VARCHAR,
-     CONSTRAINT _build_tools_uc UNIQUE (repo_id, tool)
+     CONSTRAINT _build_tools_uc UNIQUE (repo_id, tool, tool_version, runtime_version)
 );
 
 DROP MATERIALIZED VIEW IF EXISTS categorized_dependencies_mv;
 CREATE MATERIALIZED VIEW categorized_dependencies_mv AS
-SELECT 
-    repo_id, 
-    name, 
-    version, 
-    package_type, 
-    category, 
-    sub_category, 
-    tool, 
-    tool_version, 
+SELECT
+    repo_id,
+    name,
+    version,
+    package_type,
+    category,
+    sub_category,
+    tool,
+    tool_version,
     runtime_version
-FROM dependencies 
+FROM dependencies
 LEFT JOIN build_tools USING (repo_id)
 WITH NO DATA;
