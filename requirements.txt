@@ -1,0 +1,8 @@
+pandas
+PyYAML
+SQLAlchemy
+psycopg2-binary
+fastparquet
+requests
+pandas 
+tabulate
