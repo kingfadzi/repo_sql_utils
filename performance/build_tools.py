@@ -3,7 +3,6 @@ import pandas as pd
 from datetime import datetime
 
 def generate_report(output_file='build_tools_report.md'):
-    # Establish raw psycopg2 connection
     conn = psycopg2.connect(
         host='192.168.1.188',
         dbname='gitlab-usage',
@@ -12,7 +11,6 @@ def generate_report(output_file='build_tools_report.md'):
     )
     cursor = conn.cursor()
 
-    # Prepare markdown header
     md_content = f"""# Build Tools Metrics Report
 **Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
@@ -27,11 +25,13 @@ def generate_report(output_file='build_tools_report.md'):
     # --------------------------
     md_content += "## Data Completeness\n"
 
-    # Use pandas read_sql for incomplete tools
     incomplete_tools_query = """
-        SELECT tool, 
-               (COUNT(*) FILTER (WHERE tool_version IS NULL) * 100.0 / COUNT(*)) AS missing_tool_ver,
-               (COUNT(*) FILTER (WHERE runtime_version IS NULL) * 100.0 / COUNT(*)) AS missing_runtime_ver
+        SELECT tool,
+               COUNT(*) AS total_entries,
+               COUNT(*) FILTER (WHERE tool_version IS NULL) AS missing_tool_ver_count,
+               ROUND(COUNT(*) FILTER (WHERE tool_version IS NULL) * 100.0 / COUNT(*), 2) AS missing_tool_ver_pct,
+               COUNT(*) FILTER (WHERE runtime_version IS NULL) AS missing_runtime_ver_count,
+               ROUND(COUNT(*) FILTER (WHERE runtime_version IS NULL) * 100.0 / COUNT(*), 2) AS missing_runtime_ver_pct
         FROM build_tools
         GROUP BY tool
         ORDER BY (COUNT(*) FILTER (WHERE tool_version IS NULL) + 
@@ -44,14 +44,15 @@ def generate_report(output_file='build_tools_report.md'):
     md_content += incomplete_tools.to_markdown(index=False) + "\n\n"
 
     # --------------------------
-    # 2. Repository Insights
+    # 2. Repository-Level Insights
     # --------------------------
     md_content += "## Repository-Level Insights\n"
 
-    # Now using direct psycopg2 cursor for repo_incomplete
     repo_incomplete_query = """
-        SELECT repo_id, 
-               (COUNT(*) FILTER (WHERE tool_version IS NULL OR runtime_version IS NULL) * 100.0 / COUNT(*)) AS incomplete_pct
+        SELECT repo_id,
+               COUNT(*) AS total_entries,
+               COUNT(*) FILTER (WHERE tool_version IS NULL OR runtime_version IS NULL) AS missing_entries_count,
+               ROUND(COUNT(*) FILTER (WHERE tool_version IS NULL OR runtime_version IS NULL) * 100.0 / COUNT(*), 2) AS incomplete_pct
         FROM build_tools
         GROUP BY repo_id
         HAVING (COUNT(*) FILTER (WHERE tool_version IS NULL OR runtime_version IS NULL) * 100.0 / COUNT(*)) > 20
@@ -67,7 +68,7 @@ def generate_report(output_file='build_tools_report.md'):
     md_content += repo_incomplete_df.to_markdown(index=False) + "\n\n"
 
     # --------------------------
-    # Finish writing the report
+    # Write the report
     # --------------------------
     with open(output_file, 'w') as f:
         f.write(md_content)
