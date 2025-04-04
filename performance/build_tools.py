@@ -68,6 +68,39 @@ def generate_report(output_file='build_tools_report.md'):
     md_content += repo_incomplete_df.to_markdown(index=False) + "\n\n"
 
     # --------------------------
+    # 3. Build Tool Identification Completeness
+    # --------------------------
+    md_content += "## Build Tool Identification Completeness\n"
+
+    build_tool_completeness_query = """
+    WITH build_tool_summary AS (
+        SELECT
+            repo_id,
+            COUNT(*) AS tool_count,
+            COUNT(*) FILTER (WHERE tool_version IS NULL OR runtime_version IS NULL) AS incomplete_tool_count
+        FROM build_tools
+        GROUP BY repo_id
+    )
+    SELECT
+        CASE
+            WHEN bts.repo_id IS NULL THEN 'No Build Tool Detected'
+            WHEN bts.incomplete_tool_count = 0 THEN 'Build Tool Detected, Complete Data'
+            ELSE 'Build Tool Detected, Incomplete Data'
+        END AS build_tool_status,
+        COUNT(*) AS repo_count,
+        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM combined_repo_metrics), 2) AS percent_of_repos
+    FROM combined_repo_metrics crm
+    LEFT JOIN build_tool_summary bts ON crm.repo_id = bts.repo_id
+    GROUP BY build_tool_status
+    ORDER BY repo_count DESC
+    """
+
+    build_tool_completeness = pd.read_sql(build_tool_completeness_query, conn)
+
+    md_content += "\n### Summary\n"
+    md_content += build_tool_completeness.to_markdown(index=False) + "\n\n"
+
+    # --------------------------
     # Write the report
     # --------------------------
     with open(output_file, 'w') as f:
