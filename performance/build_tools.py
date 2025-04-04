@@ -17,6 +17,7 @@ def generate_report(output_file='build_tools_report.md'):
 ## Data Quality Notes
 - Metrics account for missing version data (NULL values)
 - Rates calculated as percentages of total relevant entries
+- Only ACTIVE repos with main languages Python, Java, Go, or JavaScript are considered
 
 """
 
@@ -39,7 +40,7 @@ def generate_report(output_file='build_tools_report.md'):
         LIMIT 5
     """
     incomplete_tools = pd.read_sql(incomplete_tools_query, conn)
-    
+
     md_content += "\n### Tools with Most Missing Data\n"
     md_content += incomplete_tools.to_markdown(index=False) + "\n\n"
 
@@ -63,7 +64,7 @@ def generate_report(output_file='build_tools_report.md'):
     repo_incomplete_records = cursor.fetchall()
     repo_incomplete_cols = [desc[0] for desc in cursor.description]
     repo_incomplete_df = pd.DataFrame(repo_incomplete_records, columns=repo_incomplete_cols)
-    
+
     md_content += "\n### Repos with >20% Missing Data\n"
     md_content += repo_incomplete_df.to_markdown(index=False) + "\n\n"
 
@@ -88,9 +89,16 @@ def generate_report(output_file='build_tools_report.md'):
             ELSE 'Build Tool Detected, Incomplete Data'
         END AS build_tool_status,
         COUNT(*) AS repo_count,
-        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM combined_repo_metrics), 2) AS percent_of_repos
+        ROUND(COUNT(*) * 100.0 / (
+            SELECT COUNT(*) 
+            FROM combined_repo_metrics 
+            WHERE activity_status = 'ACTIVE'
+              AND main_language IN ('Python', 'Java', 'Go', 'JavaScript')
+        ), 2) AS percent_of_repos
     FROM combined_repo_metrics crm
     LEFT JOIN build_tool_summary bts ON crm.repo_id = bts.repo_id
+    WHERE crm.activity_status = 'ACTIVE'
+      AND crm.main_language IN ('Python', 'Java', 'Go', 'JavaScript')
     GROUP BY build_tool_status
     ORDER BY repo_count DESC
     """
