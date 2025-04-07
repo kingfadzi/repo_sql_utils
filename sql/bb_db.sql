@@ -366,3 +366,8 @@ CREATE TABLE syft_dependencies (
     CONSTRAINT uq_syft_dependencies_repo_package_version UNIQUE (repo_id, package_name, version)
 );
 
+CREATE TABLE repo_profiles (
+   repo_id VARCHAR PRIMARY KEY,
+   profile_data JSONB NOT NULL,
+   last_updated TIMESTAMP DEFAULT now()
+);
