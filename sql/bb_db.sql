@@ -353,3 +353,16 @@ SELECT
 FROM dependencies
 LEFT JOIN build_tools USING (repo_id)
 WITH NO DATA;
+
+CREATE TABLE syft_dependencies (
+    id VARCHAR PRIMARY KEY,
+    repo_id VARCHAR NOT NULL,
+    package_name VARCHAR NOT NULL,
+    version VARCHAR NOT NULL,
+    package_type VARCHAR NOT NULL,
+    licenses TEXT,
+    locations TEXT,
+    language VARCHAR,
+    CONSTRAINT uq_syft_dependencies_repo_package_version UNIQUE (repo_id, package_name, version)
+);
+
