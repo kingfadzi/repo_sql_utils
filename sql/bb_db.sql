@@ -42,7 +42,10 @@ CREATE TABLE repo_metrics (
     number_of_contributors INTEGER NOT NULL,
     last_commit_date TIMESTAMP,
     repo_age_days INTEGER NOT NULL,
+    top_contributor_commits,
+    commits_by_top_3_contributor
     active_branch_count INTEGER NOT NULL,
+
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
