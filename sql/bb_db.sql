@@ -34,19 +34,19 @@ CREATE TABLE go_enry_analysis (
 );
 
 CREATE TABLE repo_metrics (
-    repo_id VARCHAR PRIMARY KEY,
-    repo_size_bytes FLOAT NOT NULL,
-    activity_status VARCHAR,
-    file_count INTEGER NOT NULL,
-    total_commits INTEGER NOT NULL,
-    number_of_contributors INTEGER NOT NULL,
-    last_commit_date TIMESTAMP,
-    repo_age_days INTEGER NOT NULL,
-    top_contributor_commits,
-    commits_by_top_3_contributor
-    active_branch_count INTEGER NOT NULL,
-
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      repo_id VARCHAR PRIMARY KEY,
+      repo_size_bytes FLOAT NOT NULL,
+      file_count INTEGER NOT NULL,
+      total_commits INTEGER NOT NULL,
+      number_of_contributors INTEGER NOT NULL,
+      activity_status VARCHAR,
+      last_commit_date TIMESTAMP,
+      repo_age_days INTEGER NOT NULL,
+      active_branch_count INTEGER NOT NULL,
+      top_contributor_commits INTEGER,
+      commits_by_top_3_contributors INTEGER,
+      recent_commit_dates TIMESTAMP[],
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE lizard_metrics (
