@@ -366,10 +366,13 @@ CREATE TABLE syft_dependencies (
     licenses TEXT,
     locations TEXT,
     language VARCHAR,
+    category VARCHAR,
+    sub_category VARCHAR,
+    framework VARCHAR,
     CONSTRAINT uq_syft_dependencies_repo_package_version UNIQUE (repo_id, package_name, version)
 );
 
 CREATE TABLE repo_profile_cache (
    repo_id VARCHAR PRIMARY KEY,
-   profile_json JSONB NOT NULL
+   profile_json TEXT NOT NULL
 );
