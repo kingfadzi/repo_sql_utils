@@ -21,9 +21,14 @@ SET browse_url =
 
 UPDATE Bitbucket_Repositories
 SET browse_url =
-        regexp_replace(
-                clone_url_ssh,
-                '^(ssh://)?git@([^/:]+)(:\d+)?/([^/]+)/([^/]+)(\.git)?$',
-                'https://\2/scm/\4/repos/\5',
+        regexp_replace(  -- Remove .git from final URL
+                regexp_replace(  -- Convert SSH to HTTPS
+                        clone_url_ssh,
+                        '^(ssh://)?git@([^/:]+?)(:\d+)?/([^/]+)/([^/]+?)(\.git)?$',
+                        'https://\2/scm/\4/repos/\5',
+                        'g'
+                ),
+                '\.git$',
+                '',
                 'g'
         )
