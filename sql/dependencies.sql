@@ -106,3 +106,11 @@ ORDER BY
     cdmv.package_type,
     cdmv.version,
     cdmv.name;
+
+SELECT r.repo_id, r.repo_name, COUNT(d2.dependency_id) AS total_dependencies
+FROM repositories r
+         JOIN dependencies d1 ON r.repo_id = d1.repo_id
+         JOIN dependencies d2 ON r.repo_id = d2.repo_id
+WHERE d1.package_name = 'gradle-wrapper'
+GROUP BY r.repo_id, r.repo_name
+ORDER BY total_dependencies DESC;
