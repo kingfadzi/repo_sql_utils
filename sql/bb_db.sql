@@ -377,3 +377,16 @@ CREATE TABLE repo_profile_cache (
    repo_id VARCHAR PRIMARY KEY,
    profile_json TEXT NOT NULL
 );
+
+
+CREATE TABLE iac_components (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    repo_id VARCHAR(255) NOT NULL,
+    repo_slug VARCHAR(255) NOT NULL,
+    repo_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    subcategory VARCHAR(255) NOT NULL,
+    framework VARCHAR(255) NOT NULL,
+    scan_timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
