@@ -390,3 +390,29 @@ CREATE TABLE iac_components (
     framework VARCHAR(255) NOT NULL,
     scan_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
 );
+
+CREATE TABLE repo_catalog (
+    repo_id VARCHAR PRIMARY KEY,
+    source_code_file_count INT,
+    total_blank INT,
+    total_comment INT,
+    total_lines_of_code INT,
+    total_trivy_vulns INT,
+    trivy_critical INT,
+    trivy_high INT,
+    trivy_medium INT,
+    trivy_low INT,
+    total_semgrep_findings INT,
+    cat_best_practice INT,
+    cat_compatibility INT,
+    cat_correctness INT,
+    cat_maintainability INT,
+    cat_performance INT,
+    cat_portability INT,
+    cat_security INT,
+    main_language VARCHAR,
+    all_languages TEXT,
+    classification_label VARCHAR,
+    app_id VARCHAR,
+    repo_size_bytes INT
+);
