@@ -464,7 +464,7 @@ CREATE TABLE application_metadata (
     house_position VARCHAR,
     business_application_sys_id VARCHAR,
     short_description TEXT,
-    Cto VARCHAR,
+    cto VARCHAR,
     business_owner VARCHAR,
     business_owner_userid VARCHAR
 );
