@@ -417,7 +417,31 @@ CREATE TABLE repo_catalog (
     repo_size_bytes INT,
     component_id VARCHAR,
     web_url VARCHAR,
-    tc VARCHAR
+    transaction_cycle VARCHAR,
+
+        -- Application metadata fields
+    business_application_name VARCHAR,
+    tech_lead_group VARCHAR,
+    correlation_id VARCHAR,
+    active VARCHAR,
+    owning_tc VARCHAR,
+    resilience_category VARCHAR,
+    application_product_owner VARCHAR,
+    application_product_owner_userid VARCHAR,
+    system_architect VARCHAR,
+    system_architect_userid VARCHAR,
+    operational_status VARCHAR,
+    application_type VARCHAR,
+    architecture_type VARCHAR,
+    install_type VARCHAR,
+    application_tier VARCHAR,
+    architecture_hosting VARCHAR,
+    house_position VARCHAR,
+    business_application_sys_id VARCHAR,
+    short_description TEXT,
+    cto VARCHAR,
+    business_owner VARCHAR,
+    business_owner_userid VARCHAR
 );
 
 CREATE TABLE application_metadata (
@@ -442,29 +466,6 @@ CREATE TABLE application_metadata (
     short_description TEXT,
     Cto VARCHAR,
     business_owner VARCHAR,
-    business_owner_userid VARCHAR,
-
-    -- Application metadata fields
-    business_application_name VARCHAR,
-    tech_lead_group VARCHAR,
-    correlation_id VARCHAR,
-    active VARCHAR,
-    owning_tc VARCHAR,
-    resilience_category VARCHAR,
-    application_product_owner VARCHAR,
-    application_product_owner_userid VARCHAR,
-    system_architect VARCHAR,
-    system_architect_userid VARCHAR,
-    operational_status VARCHAR,
-    application_type VARCHAR,
-    architecture_type VARCHAR,
-    install_type VARCHAR,
-    application_tier VARCHAR,
-    architecture_hosting VARCHAR,
-    house_position VARCHAR,
-    business_application_sys_id VARCHAR,
-    short_description TEXT,
-    cto VARCHAR,
-    business_owner VARCHAR,
     business_owner_userid VARCHAR
+
 );
