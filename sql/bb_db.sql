@@ -424,12 +424,12 @@ CREATE TABLE repo_catalog (
     tech_lead_group VARCHAR,
     correlation_id VARCHAR,
     active VARCHAR,
-    owning_tc VARCHAR,
+    owning_transaction_cycle VARCHAR,
     resilience_category VARCHAR,
     application_product_owner VARCHAR,
-    application_product_owner_userid VARCHAR,
+    application_product_owner_brid VARCHAR,
     system_architect VARCHAR,
-    system_architect_userid VARCHAR,
+    system_architect_brid VARCHAR,
     operational_status VARCHAR,
     application_type VARCHAR,
     architecture_type VARCHAR,
@@ -439,9 +439,9 @@ CREATE TABLE repo_catalog (
     house_position VARCHAR,
     business_application_sys_id VARCHAR,
     short_description TEXT,
-    cto VARCHAR,
+    chief_technology_officer VARCHAR,
     business_owner VARCHAR,
-    business_owner_userid VARCHAR
+    business_owner_brid VARCHAR
 );
 
 CREATE TABLE application_metadata (
