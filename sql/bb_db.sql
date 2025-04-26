@@ -469,3 +469,23 @@ CREATE TABLE application_metadata (
     business_owner_userid VARCHAR
 
 );
+
+CREATE TABLE harvested_repositories (
+                                        repo_id VARCHAR NOT NULL PRIMARY KEY,
+                                        repo_name VARCHAR NOT NULL,
+                                        project_key VARCHAR NOT NULL,
+                                        repo_slug VARCHAR NOT NULL,
+                                        clone_url_ssh VARCHAR,
+                                        browse_url VARCHAR,
+                                        created_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                                        updated_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                                        last_harvested_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                        app_id VARCHAR,
+                                        host_name VARCHAR,
+                                        transaction_cycle VARCHAR,
+                                        main_language VARCHAR,
+                                        classification_label VARCHAR,
+                                        activity_status VARCHAR,
+                                        status VARCHAR,
+                                        comment VARCHAR
+);
