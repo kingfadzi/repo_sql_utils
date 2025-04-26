@@ -486,5 +486,6 @@ CREATE TABLE harvested_repositories (
                                         classification_label VARCHAR,
                                         activity_status VARCHAR,
                                         status VARCHAR,
-                                        comment VARCHAR
+                                        comment VARCHAR,
+                                        scope VARCHAR
 );
