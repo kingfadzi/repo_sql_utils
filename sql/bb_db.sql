@@ -449,7 +449,7 @@ CREATE TABLE application_metadata (
     tech_lead_group VARCHAR,
     correlation_id VARCHAR PRIMARY KEY,
     active BOOLEAN,
-    owning_tc VARCHAR,
+    owning_transaction_cycle VARCHAR,
     resilience_category VARCHAR,
     application_product_owner VARCHAR,
     application_product_owner_userid VARCHAR,
@@ -464,7 +464,7 @@ CREATE TABLE application_metadata (
     house_position VARCHAR,
     business_application_sys_id VARCHAR,
     short_description TEXT,
-    Cto VARCHAR,
+    chief_technology_officer VARCHAR,
     business_owner VARCHAR,
     business_owner_userid VARCHAR
 
