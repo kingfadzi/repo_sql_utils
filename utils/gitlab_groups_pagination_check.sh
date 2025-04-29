@@ -31,6 +31,9 @@ while :; do
 
   echo " → Fetched $COUNT groups from page $PAGE"
 
+  echo "Sample group full_path values:"
+  echo "$BODY" | jq -r '.[].full_path' | head -n 5 | sed 's/^/    - /'
+
   NEXT_PAGE=$(echo "$HEADERS" | grep -i ^X-Next-Page | cut -d' ' -f2 | tr -d '\r')
 
   if [ -z "$NEXT_PAGE" ]; then
