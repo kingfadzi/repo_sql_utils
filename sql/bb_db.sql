@@ -416,6 +416,7 @@ CREATE TABLE repo_catalog (
     app_id VARCHAR,
     repo_size_bytes INT,
     component_id VARCHAR,
+    component_name VARCHAR,
     web_url VARCHAR,
     transaction_cycle VARCHAR,
 
