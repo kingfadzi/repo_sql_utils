@@ -420,6 +420,19 @@ CREATE TABLE repo_catalog (
     web_url VARCHAR,
     transaction_cycle VARCHAR,
 
+    -- From repo_metrics
+    code_size_bytes DOUBLE PRECISION,
+    file_count INTEGER,
+    repo_age_days INTEGER,
+    
+    -- From lizard_summary
+    lizard_total_nloc INTEGER,
+    lizard_total_ccn INTEGER,
+    
+    -- From xeol_results
+    xeol_eol_package_count INTEGER,
+    xeol_earliest_eol_date TIMESTAMP,
+
         -- Application metadata fields
     business_application_name VARCHAR,
     tech_lead_group VARCHAR,
