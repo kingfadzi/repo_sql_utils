@@ -340,6 +340,7 @@ CREATE TABLE IF NOT EXISTS build_tools (
    tool TEXT NOT NULL,
    tool_version TEXT,
    runtime_version TEXT,
+   extraction_method TEXT,
    confidence TEXT,
    detection_sources JSONB,
    status TEXT,
