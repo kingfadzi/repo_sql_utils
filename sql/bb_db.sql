@@ -333,14 +333,23 @@ CREATE TABLE xeol_results (
       CONSTRAINT _xeol_result_uc UNIQUE (repo_id, artifact_name, artifact_version)
 );
 
-CREATE TABLE build_tools (
-     id SERIAL PRIMARY KEY,
-     repo_id VARCHAR NOT NULL,
-     tool VARCHAR NOT NULL,
-     tool_version VARCHAR,
-     runtime_version VARCHAR,
-     CONSTRAINT _build_tools_uc UNIQUE (repo_id, tool, tool_version, runtime_version)
-);
+CREATE TABLE IF NOT EXISTS build_tools (
+   id SERIAL PRIMARY KEY,
+   repo_id TEXT NOT NULL,
+   module_path TEXT,
+   tool TEXT NOT NULL,
+   tool_version TEXT,
+   runtime_version TEXT,
+   confidence TEXT,
+   detection_sources JSONB,
+   status TEXT,
+   error TEXT,
+   created_at TIMESTAMPTZ DEFAULT now(),
+   updated_at TIMESTAMPTZ,
+   CONSTRAINT _build_tools_full_uc UNIQUE (
+               repo_id, module_path, tool, tool_version, runtime_version
+           )
+    );
 
 DROP MATERIALIZED VIEW IF EXISTS categorized_dependencies_mv;
 CREATE MATERIALIZED VIEW categorized_dependencies_mv AS
