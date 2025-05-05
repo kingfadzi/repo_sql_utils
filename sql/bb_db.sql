@@ -509,6 +509,7 @@ CREATE TABLE harvested_repositories (
     component_name VARCHAR,
     transaction_cycle VARCHAR,
     main_language VARCHAR,
+    all_languages VARCHAR,
     classification_label VARCHAR,
     activity_status VARCHAR,
     status VARCHAR,
