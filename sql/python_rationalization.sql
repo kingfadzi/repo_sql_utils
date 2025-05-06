@@ -1,17 +1,17 @@
 CASE
-    -- Match and reduce X.Y.Z → X.Y
+    -- X.Y.Z → extract and reduce to X.Y
     WHEN runtime_version ~ '\d+\.\d+\.\d+' THEN
         regexp_replace(runtime_version, '.*?(\d+\.\d+)\.\d+.*', '\1')
 
-    -- Match and reduce X.Y.* or !=X.Y.* → X.Y
+    -- X.Y.* → reduce to X.Y
     WHEN runtime_version ~ '\d+\.\d+\.\*' THEN
         regexp_replace(runtime_version, '.*?(\d+\.\d+)\.\*.*', '\1')
 
-    -- Match first X.Y version in any string with separators (comma, space, |, etc.)
+    -- First X.Y anywhere (e.g. "3.10, <3.13" → "3.10")
     WHEN runtime_version ~ '\d+\.\d+' THEN
         regexp_replace(runtime_version, '.*?(\d+\.\d+).*', '\1')
 
-    -- Match just major version → X.0 (e.g. ^3, >=3)
+    -- Just major version (e.g. ^3 → 3.0)
     WHEN runtime_version ~ '\D*(\d+)\D*$' THEN
         regexp_replace(runtime_version, '.*?(\d+)\D?.*', '\1.0')
 
