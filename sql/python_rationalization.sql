@@ -1,55 +1,16 @@
 CASE
-    WHEN TRY_CAST((
-        SELECT MIN(
-            CAST(regexp_replace(part, '^(\d+\.\d+)\.\d+$', '\1') AS numeric)
-        )
-        FROM unnest(
-            regexp_matches(
-                regexp_replace(runtime_version, '[\^~>=<!]', '', 'g'),
-                '\d+\.\d+(?:\.\d+)?',
-                'g'
-            )
-        ) AS part
-    ) AS numeric) <= 3.6 THEN 'Python ≤ 3.6'
+    -- Match and reduce full X.Y.Z to X.Y
+    WHEN runtime_version ~ '\d+\.\d+\.\d+' THEN
+        regexp_replace(runtime_version, '.*?(\d+\.\d+)\.\d+.*', '\1')
 
-    WHEN TRY_CAST((
-        SELECT MIN(
-            CAST(regexp_replace(part, '^(\d+\.\d+)\.\d+$', '\1') AS numeric)
-        )
-        FROM unnest(
-            regexp_matches(
-                regexp_replace(runtime_version, '[\^~>=<!]', '', 'g'),
-                '\d+\.\d+(?:\.\d+)?',
-                'g'
-            )
-        ) AS part
-    ) AS numeric) <= 3.8 THEN 'Python 3.7–3.8'
+    -- Match X.Y pattern
+    WHEN runtime_version ~ '\d+\.\d+' THEN
+        regexp_replace(runtime_version, '.*?(\d+\.\d+).*', '\1')
 
-    WHEN TRY_CAST((
-        SELECT MIN(
-            CAST(regexp_replace(part, '^(\d+\.\d+)\.\d+$', '\1') AS numeric)
-        )
-        FROM unnest(
-            regexp_matches(
-                regexp_replace(runtime_version, '[\^~>=<!]', '', 'g'),
-                '\d+\.\d+(?:\.\d+)?',
-                'g'
-            )
-        ) AS part
-    ) AS numeric) <= 3.10 THEN 'Python 3.9–3.10'
+    -- Match just X (standalone major version) → X.0
+    WHEN runtime_version ~ '^\D*(\d+)\D*$' THEN
+        regexp_replace(runtime_version, '.*?(\d+)\D?.*', '\1.0')
 
-    WHEN TRY_CAST((
-        SELECT MIN(
-            CAST(regexp_replace(part, '^(\d+\.\d+)\.\d+$', '\1') AS numeric)
-        )
-        FROM unnest(
-            regexp_matches(
-                regexp_replace(runtime_version, '[\^~>=<!]', '', 'g'),
-                '\d+\.\d+(?:\.\d+)?',
-                'g'
-            )
-        ) AS part
-    ) AS numeric) > 3.10 THEN 'Python ≥ 3.11'
-
-    ELSE 'Unknown'
+    -- Fallback
+    ELSE runtime_version
 END
