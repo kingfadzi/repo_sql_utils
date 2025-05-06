@@ -1,21 +1,21 @@
 CASE
-    -- .NET 5+ (e.g. net5, net5.0, net50, net60, net6.0, net8.0-windows, net07.0)
-    WHEN runtime_version ~ '(^|;)net0?([5-9])0?(\.\d+)?([-a-z0-9]*)?' THEN
-        'NET ' || regexp_replace(runtime_version, '.*(^|;)net0?([5-9])0?.*', '\2')
+    -- .NET 5+ unified (handles: net6, net60, net6.0, .net6, net8.0-windows, net07.0)
+    WHEN runtime_version ~ '(^|;)\.?(net0?([5-9])0?(\.\d+)?([-a-z0-9]*)?)' THEN
+        'NET ' || regexp_replace(runtime_version, '.*(^|;)\.?(net0?([5-9])).*', '\3')
 
     -- .NET Core (e.g. netcoreapp3.1, netcoreapp2.0)
-    WHEN runtime_version ~ '(^|;)netcoreapp(\d+(\.\d+)?)' THEN
-        'NET Core ' || regexp_replace(runtime_version, '.*(^|;)netcoreapp(\d+(\.\d+)?).*', '\2')
+    WHEN runtime_version ~ '(^|;)netcoreapp3\.' THEN
+        'NET Core 3.x'
+    WHEN runtime_version ~ '(^|;)netcoreapp2\.' THEN
+        'NET Core 2.x'
+    WHEN runtime_version ~ '(^|;)netcoreapp1\.' THEN
+        'NET Core 1.x'
 
-    -- .NET Standard 2.1 → .NET Core 3.0+
+    -- .NET Standard → inferred runtime support
     WHEN runtime_version ~ '(^|;)netstandard2\.1' THEN
-        'NET Core 3.0+'
-
-    -- .NET Standard 2.0 → .NET Core 2.0+
+        'NET Core 3.x'
     WHEN runtime_version ~ '(^|;)netstandard2\.0' THEN
-        'NET Core 2.0+'
-
-    -- .NET Standard 1.x → .NET Core 1.x
+        'NET Core 2.x'
     WHEN runtime_version ~ '(^|;)netstandard1\.' THEN
         'NET Core 1.x'
 
