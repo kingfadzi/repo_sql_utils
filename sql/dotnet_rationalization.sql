@@ -1,7 +1,7 @@
 CASE
-    -- Prefer netX (i.e. .NET 5+ unified)
-    WHEN runtime_version ~ '(^|;)\.?(net[5-9]\d*(\.\d+)?([-a-z0-9]*)?)' THEN
-        'NET ' || regexp_replace(runtime_version, '.*(^|;)\.?(net([5-9]\d*))(\.\d+)?([-a-z0-9]*)?.*', '\3')
+    -- Prefer .NET 5+ unified (handles net6.0, net60, net6.0-windows)
+    WHEN runtime_version ~ '(^|;)\.?(net[5-9]\d{1,2}(\.\d+)?([-a-z0-9]*)?)' THEN
+        'NET ' || regexp_replace(runtime_version, '.*(^|;)\.?(net([5-9]\d{1,2})).*', '\3')
 
     -- If netcoreapp, infer .NET Core
     WHEN runtime_version ~ '(^|;)netcoreapp(\d+(\.\d+)?)' THEN
@@ -23,6 +23,6 @@ CASE
     WHEN runtime_version ~ '(^|;)net4\d{1,2}' THEN
         'NET Framework'
 
-    -- Otherwise: return raw
+    -- Fallback: return raw
     ELSE runtime_version
 END
