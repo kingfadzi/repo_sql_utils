@@ -1,12 +1,16 @@
 CASE
-    -- Match and extract the first X.Y version (e.g., ^3.9, >=3.6,<3.9)
-    WHEN runtime_version ~ '[\^~><=]*\d+\.\d+' THEN
+    -- 1. Full X.Y.Z → extract and reduce to X.Y
+    WHEN runtime_version ~ '\d+\.\d+\.\d+' THEN
+        regexp_replace(runtime_version, '.*?(\d+\.\d+)\.\d+.*', '\1')
+
+    -- 2. X.Y → extract directly
+    WHEN runtime_version ~ '\d+\.\d+' THEN
         regexp_replace(runtime_version, '.*?(\d+\.\d+).*', '\1')
 
-    -- Match and convert standalone major version (e.g., ^3) to X.0
-    WHEN runtime_version ~ '[\^~><=]*\d+\b' THEN
+    -- 3. Major version only → convert to X.0
+    WHEN runtime_version ~ '\d+' THEN
         regexp_replace(runtime_version, '.*?(\d+)\b.*', '\1.0')
 
-    -- Fallback
+    -- 4. Fallback
     ELSE runtime_version
 END
