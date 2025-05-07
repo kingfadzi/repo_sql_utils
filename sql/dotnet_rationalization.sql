@@ -24,6 +24,8 @@ CASE
         'NET Core 3.x'
     WHEN runtime_version ~ '(^|;)netstandard2\.0' THEN
         'NET Core 2.x'
+    WHEN runtime_version ~ '(^|;)netstandard20' THEN
+        'NET Core 2.x'
     WHEN runtime_version ~ '(^|;)netstandard1\.' THEN
         'NET Core 1.x'
 
