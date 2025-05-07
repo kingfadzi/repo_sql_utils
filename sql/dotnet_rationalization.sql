@@ -1,4 +1,12 @@
 CASE
+    -- Explicit match for .NET 4.x.y (e.g. net4.7.2, net4.8)
+    WHEN runtime_version ~ '(^|;)net4\.\d+(\.\d+)?' THEN
+        'NET Framework'
+
+    -- Explicit match for netcoreapp6.0 and higher not caught by unified pattern
+    WHEN runtime_version ~ '(^|;)netcoreapp[6-9]\.' THEN
+        'NET ' || regexp_replace(runtime_version, '.*netcoreapp([6-9])\..*', '\1')
+
     -- .NET 5+ unified (handles: net6, net60, net6.0, .net6, net8.0-windows, net07.0)
     WHEN runtime_version ~ '(^|;)\.?(net0?([5-9])0?(\.\d+)?([-a-z0-9]*)?)' THEN
         'NET ' || regexp_replace(runtime_version, '.*(^|;)\.?(net0?([5-9])).*', '\3')
