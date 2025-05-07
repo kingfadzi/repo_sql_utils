@@ -5,7 +5,9 @@ SELECT
     hr.classification_label,
     hr.activity_status,
     hr.status,
-    STRING_AGG(DISTINCT bt.tool || ':' || bt.tool_version, ',') AS build_tools_versions
+    STRING_AGG(DISTINCT
+        bt.tool || ':' || bt.tool_version || ':' || bt.runtime_version,
+            ',') AS build_tools_versions
 FROM public.harvested_repositories hr
          LEFT JOIN public.build_tools bt ON hr.repo_id = bt.repo_id
          INNER JOIN public.go_enry_analysis ge ON hr.repo_id = ge.repo_id
