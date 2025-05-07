@@ -1,31 +1,37 @@
 CASE
-    -- 0. New: Match patterns like ">=3.10,<3.13"
-    WHEN runtime_version ~ '>=\s*\d+\.\d+' THEN
-        regexp_replace(runtime_version, '.*>=\s*(\d+\.\d+).*', '\1')
+    -- Clean spaces around delimiters
+    WHEN regexp_replace(runtime_version, '\s*(,|\|)\s*', '\1', 'g') ~ '>=\d+\.\d+' THEN
+        regexp_replace(
+            regexp_replace(runtime_version, '\s*(,|\|)\s*', '\1', 'g'),
+            '.*>=\s*(\d+\.\d+).*',
+            '\1'
+        )
 
-    -- 0.1 New: Match versions like "3.10.*"
-    WHEN runtime_version ~ '\d+\.\d+\.\*' THEN
-        regexp_replace(runtime_version, '.*?(\d+\.\d+)\.\*.*', '\1')
+    WHEN regexp_replace(runtime_version, '\s*(,|\|)\s*', '\1', 'g') ~ '\d+\.\d+\.\*' THEN
+        regexp_replace(
+            regexp_replace(runtime_version, '\s*(,|\|)\s*', '\1', 'g'),
+            '.*?(\d+\.\d+)\.\*.*',
+            '\1'
+        )
 
-    -- 0.2 New: Match pipe-separated like "^3.9|^3.10|^3.11"
-    WHEN runtime_version ~ '\^?\d+\.\d+(?:\|\^?\d+\.\d+)*' THEN
-        regexp_replace(runtime_version, '.*?\^?(\d+\.\d+).*', '\1')
+    WHEN regexp_replace(runtime_version, '\s*(,|\|)\s*', '\1', 'g') ~ '\^?\d+\.\d+(?:\|\^?\d+\.\d+)*' THEN
+        regexp_replace(
+            regexp_replace(runtime_version, '\s*(,|\|)\s*', '\1', 'g'),
+            '.*?\^?(\d+\.\d+).*',
+            '\1'
+        )
 
-    -- 1. Prefer >=X.Y.Z or >=X.Y
     WHEN runtime_version ~ '>=\s*\d+\.\d+(\.\d+)?' THEN
-        regexp_replace(runtime_version, '.*>=\s*(\d+\.\d+).*', '\1')
+        regexp_replace(runtime_version, '.*>=\s*(\d+\.\d+)(?:\.\d+)?[^0-9]?.*', '\1')
 
-    -- 2. Fallback: first X.Y.Z → X.Y
     WHEN runtime_version ~ '\d+\.\d+\.\d+' THEN
         regexp_replace(runtime_version, '.*?(\d+\.\d+)\.\d+.*', '\1')
 
-    -- 3. Fallback: first X.Y (anywhere)
     WHEN runtime_version ~ '\d+\.\d+' THEN
         regexp_replace(runtime_version, '.*?(\d+\.\d+).*', '\1')
 
-    -- 4. Major version only → X.0
     WHEN runtime_version ~ '\m\d+\M' THEN
         regexp_replace(runtime_version, '.*?\m(\d+)\M.*', '\1.0')
 
-    ELSE runtime_version  -- fallback to raw value for debug
+    ELSE runtime_version
 END
