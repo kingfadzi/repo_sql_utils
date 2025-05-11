@@ -516,3 +516,18 @@ CREATE TABLE harvested_repositories (
     comment VARCHAR,
     scope VARCHAR
 );
+
+CREATE TABLE build_config_cache (
+    id TEXT PRIMARY KEY,
+    repo_id TEXT NOT NULL,
+    run_id TEXT,
+    browse_url TEXT,
+    tool TEXT,
+    variant TEXT,
+    module_path TEXT,
+    copied_files JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+CREATE INDEX idx_build_config_cache_repo_id ON build_config_cache (repo_id);
