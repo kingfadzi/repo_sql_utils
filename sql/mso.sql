@@ -4,6 +4,8 @@ SELECT
     public.harvested_repositories.activity_status,
     public.harvested_repositories.transaction_cycle,
     public.harvested_repositories.component_name,
+    public.harvested_repositories.main_language,
+    public.harvested_repositories.all_languages,
     public.build_config_cache.tool,
     public.build_config_cache.variant,
     public.build_config_cache.module_path,
@@ -18,4 +20,4 @@ FROM
         LEFT JOIN
     public.build_config_cache
     ON public.harvested_repositories.repo_id = public.build_config_cache.repo_id
-    LIMIT 1048575;
+
