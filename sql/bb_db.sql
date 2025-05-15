@@ -536,7 +536,7 @@ CREATE TABLE build_config_cache (
     error TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITHOUT TIME ZONE,
-    CONSTRAINT _build_tools_full_uc UNIQUE (
+    CONSTRAINT _build_config_cache_full_uc UNIQUE (
         repo_id,
         module_path,
         tool,
