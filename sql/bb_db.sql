@@ -519,15 +519,30 @@ CREATE TABLE harvested_repositories (
 
 CREATE TABLE build_config_cache (
     id TEXT PRIMARY KEY,
-    repo_id TEXT NOT NULL,
+    repo_id TEXT,
     run_id TEXT,
     browse_url TEXT,
     tool TEXT,
     variant TEXT,
     module_path TEXT,
-    copied_files JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    copied_files JSON NOT NULL,
+    sbom_path TEXT,
+    tool_version TEXT,
+    runtime_version TEXT,
+    confidence TEXT,
+    detection_sources JSON,
+    extraction_method TEXT,
+    status TEXT,
+    error TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT _build_tools_full_uc UNIQUE (
+        repo_id,
+        module_path,
+        tool,
+        tool_version,
+        runtime_version
+        )
 );
 
-
-CREATE INDEX idx_build_config_cache_repo_id ON build_config_cache (repo_id);
+CREATE INDEX ix_build_config_cache_repo_id ON build_config_cache (repo_id);
