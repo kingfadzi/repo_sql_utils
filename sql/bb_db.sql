@@ -531,6 +531,7 @@ CREATE TABLE build_config_cache (
     runtime_version TEXT,
     confidence TEXT,
     detection_sources JSON,
+    meta_data JSON,
     extraction_method TEXT,
     status TEXT,
     error TEXT,
