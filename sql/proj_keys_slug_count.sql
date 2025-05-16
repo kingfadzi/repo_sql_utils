@@ -4,8 +4,8 @@ SELECT
 FROM
     harvested_repositories
 WHERE
-    main_language IS NOT NULL
-  AND activity_status = 'active'
+    main_language = 'Python'
+  AND activity_status = 'ACTIVE'
 GROUP BY
     project_key
 ORDER BY
