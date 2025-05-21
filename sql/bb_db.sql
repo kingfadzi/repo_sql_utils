@@ -541,6 +541,7 @@ CREATE TABLE build_config_cache (
         repo_id,
         module_path,
         tool,
+        variant,
         tool_version,
         runtime_version
         )
