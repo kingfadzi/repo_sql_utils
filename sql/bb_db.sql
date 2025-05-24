@@ -465,7 +465,12 @@ CREATE TABLE repo_catalog (
     short_description TEXT,
     chief_technology_officer VARCHAR,
     business_owner VARCHAR,
-    business_owner_brid VARCHAR
+    business_owner_brid VARCHAR,
+
+    -- from build_config_cache
+    build_tool_version VARCHAR,
+    runtime_version VARCHAR
+
 );
 
 CREATE TABLE application_metadata (
