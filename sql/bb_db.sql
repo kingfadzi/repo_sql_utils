@@ -474,7 +474,23 @@ CREATE TABLE repo_catalog (
     -- from syft_dependencies
     dependency_count INTEGER,
     package_types VARCHAR,
-    top_packages VARCHAR
+    top_packages VARCHAR,
+
+    -- from xeol_results
+    eol_package_count INTEGER,
+    earliest_eol_date TIMESTAMP,
+
+    -- from iac_components
+    iac_frameworks VARCHAR,
+
+    -- from grype_results
+    grype_total_vulns INTEGER,
+    grype_fixable_vulns INTEGER,
+    grype_critical_fixable INTEGER,
+    grype_high_fixable INTEGER,
+    grype_medium_fixable INTEGER,
+    grype_low_fixable INTEGER
+
 
 );
 
