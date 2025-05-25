@@ -469,7 +469,12 @@ CREATE TABLE repo_catalog (
 
     -- from build_config_cache
     build_tool_version VARCHAR,
-    runtime_version VARCHAR
+    runtime_version VARCHAR,
+
+    -- from syft_dependencies
+    dependency_count INTEGER,
+    package_types VARCHAR,
+    top_packages VARCHAR
 
 );
 
