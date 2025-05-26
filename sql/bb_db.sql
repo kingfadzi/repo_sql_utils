@@ -494,31 +494,7 @@ CREATE TABLE repo_catalog (
 
 );
 
-CREATE TABLE application_metadata (
-    business_application_name VARCHAR,
-    tech_lead_group VARCHAR,
-    correlation_id VARCHAR PRIMARY KEY,
-    active BOOLEAN,
-    owning_transaction_cycle VARCHAR,
-    resilience_category VARCHAR,
-    application_product_owner VARCHAR,
-    application_product_owner_userid VARCHAR,
-    system_architect VARCHAR,
-    system_architect_userid VARCHAR,
-    operational_status VARCHAR,
-    application_type VARCHAR,
-    architecture_type VARCHAR,
-    install_type VARCHAR,
-    application_tier VARCHAR,
-    architecture_hosting VARCHAR,
-    house_position VARCHAR,
-    business_application_sys_id VARCHAR,
-    short_description TEXT,
-    chief_technology_officer VARCHAR,
-    business_owner VARCHAR,
-    business_owner_userid VARCHAR
 
-);
 
 CREATE TABLE harvested_repositories (
     repo_id VARCHAR NOT NULL PRIMARY KEY,
