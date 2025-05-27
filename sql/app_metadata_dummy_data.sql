@@ -50,3 +50,8 @@ UPDATE harvested_repositories hr
 SET app_id = am.correlation_id
     FROM application_metadata am
 WHERE hr.repo_id = am.repo_id;
+
+UPDATE harvested_repositories hr
+SET transaction_cycle = am.owning_transaction_cycle
+    FROM application_metadata am
+WHERE hr.repo_id = am.repo_id;

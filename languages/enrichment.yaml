@@ -1,0 +1,179 @@
+Java:
+  strategic_state: Invest
+  owner: Xylo Trapezoid (xtz001)
+  latest_version: "17"
+  supported_versions:
+    - 11
+    - 17
+    - 21
+    - 23
+
+Python:
+  strategic_state: Invest
+  owner: Quasar Blipton (qb002)
+  latest_version: "3.11"
+  supported_versions:
+    - 3.8
+    - 3.9
+    - 3.10
+    - 3.11
+
+JavaScript:
+  strategic_state: Invest
+  owner: Nebula Crankshaft (nc003)
+  latest_version: "ES2022"
+  supported_versions:
+    - ES6
+    - ES2017
+    - ES2020
+    - ES2022
+
+C#:
+  strategic_state: Maintain
+  owner: Zoodle Klempt (zk004)
+  latest_version: "10"
+  supported_versions:
+    - 7
+    - 8
+    - 9
+    - 10
+
+Go:
+  strategic_state: Invest
+  owner: Jibber Flux (jf005)
+  latest_version: "1.21"
+  supported_versions:
+    - 1.18
+    - 1.19
+    - 1.20
+    - 1.21
+
+Ruby:
+  strategic_state: Divest
+  owner: Mondo Grapple (mg006)
+  latest_version: "3.2"
+  supported_versions:
+    - 2.7
+    - 3.0
+    - 3.1
+    - 3.2
+
+PHP:
+  strategic_state: Divest
+  owner: Vortex Quibb (vq007)
+  latest_version: "8.2"
+  supported_versions:
+    - 7.4
+    - 8.0
+    - 8.1
+    - 8.2
+
+TypeScript:
+  strategic_state: Invest
+  owner: Wizzle Trank (wt008)
+  latest_version: "5.1"
+  supported_versions:
+    - 4.5
+    - 4.9
+    - 5.0
+    - 5.1
+
+Kotlin:
+  strategic_state: Maintain
+  owner: Glimmer Snazz (gs009)
+  latest_version: "1.9"
+  supported_versions:
+    - 1.6
+    - 1.7
+    - 1.8
+    - 1.9
+
+Swift:
+  strategic_state: Maintain
+  owner: Blarp Kadoodle (bk010)
+  latest_version: "5.9"
+  supported_versions:
+    - 5.5
+    - 5.6
+    - 5.7
+    - 5.9
+
+JSON:
+  strategic_state: Tolerate
+  owner: Cranch Dimpler (cd011)
+  latest_version: "1.0"
+  supported_versions:
+    - 1.0
+
+Jupyter Notebook:
+  strategic_state: Invest
+  owner: Pogo Quantum (pq012)
+  latest_version: "7.0"
+  supported_versions:
+    - 6.5
+    - 7.0
+
+Groovy:
+  strategic_state: Maintain
+  owner: Noodle Vex (nv013)
+  latest_version: "4.0"
+  supported_versions:
+    - 3.0
+    - 4.0
+
+Java Server Pages:
+  strategic_state: Divest
+  owner: Zorp Gribble (zg014)
+  latest_version: "2.3"
+  supported_versions:
+    - 2.0
+    - 2.1
+    - 2.2
+    - 2.3
+
+TSX:
+  strategic_state: Invest
+  owner: Flarn Wizzlepop (fw015)
+  latest_version: "5.1"
+  supported_versions:
+    - 4.9
+    - 5.0
+    - 5.1
+
+Jinja:
+  strategic_state: Tolerate
+  owner: Plibber Thatch (pt016)
+  latest_version: "3.1"
+  supported_versions:
+    - 2.11
+    - 3.0
+    - 3.1
+
+C:
+  strategic_state: Maintain
+  owner: Yibble Grom (yg017)
+  latest_version: "C18"
+  supported_versions:
+    - C89
+    - C99
+    - C11
+    - C18
+
+C++:
+  strategic_state: Maintain
+  owner: Snork Blasterton (sb018)
+  latest_version: "C++20"
+  supported_versions:
+    - C++11
+    - C++14
+    - C++17
+    - C++20
+
+ASP.NET:
+  strategic_state: Maintain
+  owner: Trindle Zap (tz019)
+  latest_version: "7.0"
+  supported_versions:
+    - 4.8
+    - 6.0
+    - 7.0
