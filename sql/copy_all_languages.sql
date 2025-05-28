@@ -1,10 +1,11 @@
-UPDATE harvested_repositories r
-SET all_languages = sub.all_languages
+UPDATE harvested_repositories hr
+SET all_languages = sub.languages
     FROM (
     SELECT
-        repo_id,
-        STRING_AGG(language, ', ' ORDER BY percent_usage DESC) AS all_languages
-    FROM go_enry_analysis
-    GROUP BY repo_id
+        ga.repo_id,
+        STRING_AGG(ga.language, ', ' ORDER BY ga.percent_usage DESC) AS languages
+    FROM go_enry_analysis ga
+    WHERE ga.language IS NOT NULL AND ga.percent_usage IS NOT NULL
+    GROUP BY ga.repo_id
 ) sub
-WHERE r.repo_id = sub.repo_id;
+WHERE hr.repo_id = sub.repo_id;
