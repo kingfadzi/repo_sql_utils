@@ -374,6 +374,7 @@ CREATE TABLE syft_dependencies (
     package_name VARCHAR NOT NULL,
     version VARCHAR NOT NULL,
     package_type VARCHAR NOT NULL,
+    normalized_version VARCHAR,
     licenses TEXT,
     locations TEXT,
     language VARCHAR,
