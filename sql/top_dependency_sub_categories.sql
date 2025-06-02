@@ -1,30 +1,25 @@
--- Get top 15 subcategories by repository count
-WITH top_subcategories AS (
+WITH subcat_totals AS (
     SELECT
-        sub_category,
-        COUNT(DISTINCT repo_id) AS repo_count
-    FROM syft_dependencies
-    WHERE
-        sub_category IS NOT NULL
-      AND sub_category <> ''
-    GROUP BY sub_category
-    ORDER BY repo_count DESC
+        sd.sub_category,
+        COUNT(DISTINCT sd.repo_id) AS total_repo_count
+    FROM syft_dependencies sd
+             JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
+    WHERE sd.sub_category IS NOT NULL AND sd.sub_category <> ''
+    GROUP BY sd.sub_category
+),
+     top_subcategories AS (
+         SELECT sub_category
+         FROM subcat_totals
+         ORDER BY total_repo_count DESC
     LIMIT 15
     )
-
--- Get framework usage within top subcategories
 SELECT
     sd.sub_category,
-    sd.framework,
+    sd.package_type,
     COUNT(DISTINCT sd.repo_id) AS repo_count
 FROM syft_dependencies sd
-WHERE
-    sd.sub_category IN (SELECT sub_category FROM top_subcategories)
-  AND sd.framework IS NOT NULL
-  AND sd.framework <> ''
-GROUP BY
-    sd.sub_category,
-    sd.framework
-ORDER BY
-    sd.sub_category,
-    repo_count DESC;
+         JOIN harvested_repositories hr ON sd.repo_id = hr.repo_id
+         JOIN top_subcategories ts ON sd.sub_category = ts.sub_category
+WHERE sd.package_type IS NOT NULL AND sd.package_type <> ''
+GROUP BY sd.sub_category, sd.package_type
+ORDER BY sd.sub_category, repo_count DESC;
