@@ -406,7 +406,17 @@ CREATE TABLE iac_components (
     scan_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
 );
 
-CREATE INDEX idx_ic_subcategory_pattern ON iac_components (LOWER(subcategory) text_pattern_ops);
+
+CREATE INDEX IF NOT EXISTS idx_ic_repo_id_framework_category
+    ON iac_components (repo_id, framework, category);
+
+CREATE INDEX IF NOT EXISTS idx_ic_subcategory
+    ON iac_components (subcategory);
+
+CREATE INDEX IF NOT EXISTS idx_hr_lower_main_language
+    ON harvested_repositories (LOWER(main_language));
+
+
 
 CREATE TABLE repo_catalog (
     repo_id VARCHAR PRIMARY KEY,
@@ -525,6 +535,22 @@ CREATE TABLE harvested_repositories (
     comment VARCHAR,
     scope VARCHAR
 );
+
+CREATE INDEX IF NOT EXISTS idx_hr_host_name
+    ON harvested_repositories (host_name);
+
+CREATE INDEX IF NOT EXISTS idx_hr_transaction_cycle
+    ON harvested_repositories (transaction_cycle);
+
+CREATE INDEX IF NOT EXISTS idx_hr_main_language
+    ON harvested_repositories (main_language);
+
+CREATE INDEX IF NOT EXISTS idx_hr_classification_label
+    ON harvested_repositories (classification_label);
+
+CREATE INDEX IF NOT EXISTS idx_hr_activity_status
+    ON harvested_repositories (activity_status);
+
 
 CREATE TABLE build_config_cache (
     id TEXT PRIMARY KEY,
