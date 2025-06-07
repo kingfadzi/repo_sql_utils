@@ -406,6 +406,8 @@ CREATE TABLE iac_components (
     scan_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
 );
 
+CREATE INDEX idx_ic_subcategory_pattern ON iac_components (LOWER(subcategory) text_pattern_ops);
+
 CREATE TABLE repo_catalog (
     repo_id VARCHAR PRIMARY KEY,
     source_code_file_count INT,
