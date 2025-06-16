@@ -534,7 +534,10 @@ CREATE TABLE harvested_repositories (
     activity_status VARCHAR,
     status VARCHAR,
     comment VARCHAR,
-    scope VARCHAR
+    scope VARCHAR,
+    last_analysis_date TIMESTAMP WITHOUT TIME ZONE,
+    last_analysis_stage VARCHAR,
+    last_analysis_status VARCHAR
 );
 
 CREATE INDEX IF NOT EXISTS idx_hr_host_name
